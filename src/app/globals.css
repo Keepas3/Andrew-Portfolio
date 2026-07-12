@@ -637,9 +637,86 @@
         }
 
         .master-global-player {
-            width: 95% !important;
-            bottom: 16px !important;
-            padding: 0 1rem !important; 
+            width: calc(100% - 1rem) !important;
+            max-width: none !important;
+            min-height: 112px !important;
+            height: auto !important;
+            bottom: 10px !important;
+            padding: 0.8rem 0.95rem !important;
+            border-radius: 24px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 0.65rem !important;
+        }
+
+        .player-left-meta {
+            width: 100% !important;
+            min-width: 0 !important;
+            justify-content: center !important;
+            padding-right: 0 !important;
+        }
+
+        .player-left-meta > div:first-child {
+            margin-left: 0 !important;
+        }
+
+        .player-center-row {
+            width: 100% !important;
+            padding: 0 !important;
+            order: 3 !important;
+        }
+
+        .player-center-row > div:first-child {
+            gap: 0.8rem !important;
+        }
+
+        .player-center-row > div:last-child {
+            flex-direction: column !important;
+            gap: 0.4rem !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        .player-center-row > div:last-child > span {
+            margin: 0 !important;
+            min-width: 0 !important;
+            text-align: center !important;
+        }
+
+        .player-center-row > div:last-child > div[class*='h-[5px]'] {
+            min-width: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        .player-right-controls {
+            width: 100% !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            order: 2 !important;
+            flex-wrap: wrap !important;
+            gap: 0.6rem !important;
+        }
+
+        .player-right-controls > div:first-child {
+            margin-right: 0 !important;
+            transform: none !important;
+        }
+
+        .player-right-controls input {
+            width: 96px !important;
+        }
+
+        .queue-popup {
+            left: 50% !important;
+            right: auto !important;
+            transform: translateX(-50%) !important;
+            width: min(88vw, 18rem) !important;
+            height: min(70vh, 320px) !important;
+            bottom: 5.25rem !important;
         }
 
         .master-global-player .font-mono.text-zinc-500.w-6 {

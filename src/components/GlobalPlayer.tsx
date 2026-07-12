@@ -45,7 +45,7 @@ export default function GlobalPlayer() {
         const data = await client.fetch(`
           *[_type == "album" && defined(tracks)] {
             "albumTitle": title,
-            "albumArtist": album,
+            "albumArtist": subtitle,
             "image": image.asset->url,
             tracks[]{
               name,
@@ -197,7 +197,7 @@ export default function GlobalPlayer() {
       />
   
       {/* LEFT SIDE: Artwork & Metadata */}
-      <div className="flex items-center w-[32%] min-w-[220px]">
+      <div className="player-left-meta flex items-center w-[32%] min-w-[220px]">
         <div 
           style={{ width: '50px', height: '50px', minWidth: '50px', marginLeft: '12px' }} 
           className="bg-black rounded-full overflow-hidden relative shrink-0 shadow-md p-0 border-0 m-0"
@@ -220,7 +220,7 @@ export default function GlobalPlayer() {
       </div>
 
       {/* CENTER ROW: Controls & Progress */}
-      <div className="flex-1 px-4 flex flex-col items-center gap-2">
+      <div className="player-center-row flex-1 px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-4 shrink-0 mb-0.5">
           <button onClick={() => setIsShuffle(!isShuffle)} className={`player-ctrl-btn text-sm ${isShuffle ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiShuffle /></button>
           <button onClick={handlePrevious} className="player-ctrl-btn text-base"><FiSkipBack /></button>
@@ -272,7 +272,7 @@ export default function GlobalPlayer() {
       </div>
 
       {/* RIGHT SIDE: Equalizer, Volume & Dropdown */}
-      <div className="flex items-center gap-3 relative w-[26%] justify-start shrink-0 ml-0 mt-2 pr-0">
+      <div className="player-right-controls flex items-center gap-3 relative w-[26%] justify-start shrink-0 ml-0 mt-2 pr-0">
         <div className="flex items-center gap-2 rounded-full bg-[rgba(56,189,248,0.08)] backdrop-blur-md px-2.5 py-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.25)] mr-2 translate-x-[-10px] translate-y-[6px]">
           <button 
             onClick={toggleMute} 
@@ -304,7 +304,7 @@ export default function GlobalPlayer() {
               animate={{ opacity: 1, y: 0, scale: 1 }} 
               exit={{ opacity: 0, y: 10, scale: 0.95 }} 
               transition={{ duration: 0.15 }} 
-              className="absolute bottom-20 right-0 w-72 h-[320px] overflow-hidden bg-[#030712]/95 border border-white/10 rounded-xl p-2 shadow-2xl z-[999999] backdrop-blur-md"
+              className="queue-popup absolute bottom-20 right-0 w-72 h-[320px] overflow-hidden bg-[#030712]/95 border border-white/10 rounded-xl p-2 shadow-2xl z-[999999] backdrop-blur-md"
             >
               <p className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase px-2 py-1 border-b border-white/5 mb-2">Queue Directory</p>
               <div className="flex flex-col gap-1 h-[calc(320px-3.5rem)] overflow-y-auto overflow-x-hidden overscroll-contain pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">

@@ -67,9 +67,9 @@ export default defineType({
               title: 'Song or Module Name' 
             }),
             defineField({ 
-              name: 'duration', 
+              name: 'albumArtist', 
               type: 'string', 
-              title: 'Length of song (ex: 3:42)' 
+              title: 'Song Artist (probably just you)' 
             }),
             defineField({
               name: 'mediaFile',
