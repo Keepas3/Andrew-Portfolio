@@ -1,26 +1,676 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer utilities {
+    /* --- Core Global Resets --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        overflow-y: scroll;
+    }
+
+    body {
+        font-family: var(--font-comfortaa), -apple-system, sans-serif;
+        color: #ffffff;
+        background: linear-gradient(to bottom, #030712 0%, #000000 100%);
+        background-attachment: fixed;
+        overflow-x: hidden;
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    /* --- Ambient Background Layer --- */
+    #sakura-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        pointer-events: none;
+        display: block;
+        opacity: 0.15;
+    }
+
+    /* --- Navigation Bar --- */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 70px; 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10%;
+        z-index: 1000;
+        background: rgba(3, 7, 18, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        transition: all 0.3s ease;
+    }
+
+    .nav-logo {
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #e0f2fe;
+    }
+
+    .nav-logo a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .nav-links {
+        font-size: 1.1rem;
+        display: flex;
+        list-style: none;
+        gap: 3.0rem;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+        color: #38bdf8;
+    }
+
+    /* --- Universal Sub-Page Grid Blueprint --- */
+    .page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        /* FIXED: Reverted bottom padding to a normal 4rem. The clearance space belongs on the footer! */
+        padding: 130px 2rem 2rem 2rem !important; 
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    .page-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem; 
+        color: #38bdf8;
+    }
+
+    /* --- Bento Layout Status Boxes --- */
+    .status-box {
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        backdrop-filter: blur(5px);
+    }
+
+    .status-box h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #38bdf8;
+    }
+
+    .section-divider {
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 0.5rem;
+    }
+
+    .status-text {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+    }
+
+    .category-card-item {
+        display: block;
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        background-color: rgba(255, 255, 255, 0.01);
+        transition: all 0.2s ease-in-out;
+        text-decoration: none;
+    }
+
+    .category-card-item:hover {
+        border-color: rgba(56, 189, 248, 0.2);
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .games-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .game-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.2s ease;
+    }
+
+    .game-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .game-info h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* ==========================================================================
+       WORK / PROJECTS / ALBUMS SECTION (COMPACT SELECTION GRID)
+       ========================================================================== */
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.75rem;
+        width: 100%;
+    }
+
+    .project-card {
+        display: flex;
+        flex-direction: column;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease;
+        text-decoration: none !important;
+    }
+
+    .project-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(56, 189, 248, 0.25);
+    }
+
+    /* ─── FIXED: EXPLICIT IMAGE FOOTPRINT CLAMP ─── */
+    .project-card img {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1 !important; /* Forces standard square record jacket geometry */
+        object-fit: cover !important; /* Prevents stretching or squishing */
+        display: block;
+    }
+
+    .project-info {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
+    }
+
+    .project-info span.font-mono {
+        color: rgba(255, 255, 255, 0.4) !important;
+        font-size: 10px;
+    }
+
+    .project-info h3 {
+        color: #ffffff !important;
+        font-size: 1.1rem;
+        font-weight: 700;
+        transition: color 0.2s ease;
+    }
+
+    .project-card:hover .project-info h3 {
+        color: #38bdf8 !important; 
+    }
+
+    .project-desc {
+        font-size: 0.8rem !important;
+        color: rgba(255, 255, 255, 0.55) !important;
+        line-height: 1.5;
+    }
+
+    .tag {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        background: rgba(56, 189, 248, 0.08);
+        color: #38bdf8;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+
+    /* ==========================================================================
+       DYNAMIC GALLERY STYLES (VIEWPORT-LOCKED AUTO-FIT)
+       ========================================================================== */
+    .gallery-wrapper {
+        position: relative;
+        width: 100%;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* FIXED: Switched max-width to 85vw (Viewport Width) and max-height to 75vh.
+       This prevents the box from infinitely expanding if the raw image file is massive. */
+    .gallery-slide-window-dynamic {
+        width: fit-content !important;
+        max-width: 85vw !important; 
+        max-height: 75vh !important;
+        height: auto;
+        overflow: hidden;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: #0d0d0d;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .gallery-slide-active {
+        width: fit-content;
+        height: fit-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* FIXED: Double-clamped the image itself to strictly obey the monitor viewport size */
+    .gallery-image-dynamic {
+        width: auto !important;
+        height: auto !important;
+        max-width: 85vw !important; 
+        max-height: 70vh !important; 
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Fixed floating positioning for target navigation buttons */
+    .gallery-control-btn {
+        position: absolute;
+        z-index: 40;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(3, 7, 18, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: white;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .gallery-control-btn:hover {
+        background: #a855f7;
+        border-color: transparent;
+        transform: translateY(-50%) scale(1.06);
+    }
+
+    .gallery-control-btn.left { left: 2%; }
+    .gallery-control-btn.right { right: 2%; }
+
+    .gallery-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .gallery-dots .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .gallery-dots .dot.active {
+        background: #38bdf8;
+        transform: scale(1.2);
+    }
+
+    .gallery-meta {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;    
+    }
+
+    .site-footer {
+        width: 100%;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(3, 7, 18, 0.5);
+        margin-top: auto;
+        position: relative;
+        /* FIXED: Lowered z-index to 0 so it slides cleanly UNDER the z-999999 audio player */
+        z-index: 0; 
+        padding: 2rem !important; /* Normal, compact footer sizing */
+    }
+
+    /* Target the container you built inside Footer.tsx */
+    .footer-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        position: relative;
+    }
+
+    .footer-basics {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        width: max-content;
+        z-index: 1;
+    }
+
+    .footer-name {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.4); /* Slightly dimmed so it blends smoothly behind the player */
+        font-family: monospace;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-socials {
+        z-index: 2; /* Ensures social links are clickable */
+    }
+
+    /* ==========================================================================
+       PROFILE PAGE bento & HERO ENGINE (ICE BLUE / OBSIDIAN THEME)
+       ========================================================================== */
+    .banner-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 320px;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .banner-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.35; /* Keeps it dim and atmospheric */
+        filter: saturate(0.8) hue-rotate(190deg); /* Pulls it toward your blue theme */
+    }
+
+    .portfolio-main {
+        position: relative;
+        z-index: 10;
+        max-width: 900px;
+        margin: 0 auto;
+        padding-top: 220px; /* Pushes the profile content safely below the top navbar fold */
+    }
+
+    .profile-header {
+        background: rgba(3, 7, 18, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .profile-title-row {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* ─── FIXED: Clamps your avatar picture footprint perfectly ─── */
+    .avatar-container {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #38bdf8; /* Sharp neon-cyan trim border */
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+        background: #030712;
+        shrink-0: 1;
+    }
+
+    .avatar-container img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+
+    .profile-name {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+        background: linear-gradient(to right, #ffffff, #93c5fd);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .profile-bio {
+        font-size: 1rem;
+        line-gradient: 1.6;
+        color: rgba(255, 255, 255, 0.75);
+        border-left: 3px solid #38bdf8; /* Left accent bar matches cyan theme */
+        padding-left: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    /* --- Bento Layout Constraints --- */
+    .status-rows-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .top-activity-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        width: 100%;
+    }
+
+    /* Spotify Component Shell Adjustment */
+    .spotify-widget-container {
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000000;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    /* Target Responsive Fixes inside your existing Media Query */
+    @media (max-width: 768px) {
+        .top-activity-row {
+            grid-template-columns: 1fr !important; /* Stacks layout neatly on phone viewports */
+            gap: 1.5rem;
+        }
+        .profile-title-row {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        .profile-bio {
+            border-left: none;
+            border-top: 3px solid #38bdf8;
+            padding-left: 0;
+            padding-top: 1rem;
+        }
+    }
+
+    /* ==========================================================================
+   GLOBAL FLOATING AUDIO CORE OVERRIDE (COMPACT FLOATING DOCK)
+   ========================================================================== */
+.master-global-player {
+        position: fixed !important;
+        bottom: 24px !important; 
+        left: 50% !important;
+        transform: translateX(-50%) !important; 
+        width: 90% !important;
+        max-width: 900px !important; /* Fixed invalid max-width property */
+        height: 70px !important;
+        z-index: 999999 !important;
+        
+        /* FIXED: Dropped opacity from 0.85 to 0.25 to make it highly transparent glass */
+        background: rgba(3, 7, 18, 0.25) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 999px !important; 
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+/* --- TEXT AND TRACK INFO ALIGNMENT RESETS --- */
+.master-global-player h4 {
+    color: #ffffff !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.master-global-player p {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.5px !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --- CONTROL BUTTON HOVER STATES --- */
+.player-ctrl-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.player-ctrl-btn:hover {
+    color: #38bdf8;
+    background: rgba(255, 255, 255, 0.03);
+}
+    /* ==========================================================================
+       MOBILE RESPONSIVENESS OVERRIDES
+       ========================================================================== */
+    @media (max-width: 768px) {
+        .navbar {
+            padding: 0 5% !important; 
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 0.9rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem !important;
+            font-size: 0.95rem !important;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 4px;
+            width: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-slide {
+            padding: 0.25rem;
+        }
+
+        .gallery-control-btn.left { left: 8px; }
+        .gallery-control-btn.right { right: 8px; }
+
+        /* ==========================================================================
+       MOBILE RESPONSIVENESS OVERRIDES
+       ========================================================================== */
+    @media (max-width: 768px) {
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.5rem;
+            padding-bottom: 80px; /* Adds clearance so the mobile player doesn't block links */
+        }
+        
+        .footer-basics {
+            position: relative;
+            left: 0;
+            transform: none;
+        }
+        
+        .page-container {
+            padding: 100px 1.25rem 3rem 1.25rem !important;
+        }
+
+        /* 2. Compact the Global Player pill so it fits perfectly on phones */
+        .master-global-player {
+            width: 95% !important;
+            bottom: 16px !important;
+            padding: 0 1rem !important; /* Reduces side padding to free up space */
+        }
+
+        /* 3. Hide the timeline timestamps (0:45 / 3:28) on mobile to give the play buttons room */
+        .master-global-player .font-mono.text-zinc-500.w-6 {
+            display: none !important;
+        }
+
+        /* 4. Shrink the track text so long song names don't overlap the controls */
+        .master-global-player h4 {
+            font-size: 0.75rem !important;
+        }
+        .master-global-player p {
+            font-size: 9px !important;
+        }
+
+        /* 5. Shrink the control buttons slightly */
+        .player-ctrl-btn {
+            padding: 4px !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* 6. Ensure the album art cover scales down slightly */
+        .master-global-player .w-11.h-11 {
+            width: 36px !important;
+            height: 36px !important;
+        }
+    }
+    }
 }
