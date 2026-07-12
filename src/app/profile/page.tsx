@@ -1,18 +1,19 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+// FIXED: Imported the strict 'Variants' type from framer-motion
+import { motion, Variants } from 'framer-motion';
 import { SiGithub, SiSpotify, SiOsu } from 'react-icons/si';
 import Navbar from "@/components/Navbar";
 
 export default function ProfilePage() {
-  // Framer motion standard presets for buttery-smooth entries
-  const fadeInUp = {
+  // FIXED: Added ': Variants' so TypeScript knows this is a valid Framer Motion object
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 25 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };
 
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -80,7 +81,6 @@ export default function ProfilePage() {
         >
           <div className="top-activity-row">
             
-            {/* BENTO MODULE 1: Audio Production & Tech Environment */}
             {/* BENTO MODULE 1: Casual Daily Drivers & Gear */}
             <motion.div variants={fadeInUp} className="status-box">
               <h3>Programs I use</h3>
@@ -91,8 +91,6 @@ export default function ProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {[
                   'FL Studio', 
-            
-                  
                   'Audio Interface', 
                   'Mechanical Keyboard', 
                   'Framer Motion'
@@ -114,12 +112,11 @@ export default function ProfilePage() {
                 <div className="section-divider" />
               </div>
 
-              {/* FIXED: Removed the parent padding box limits and forced explicit height sizing constraints */}
               <div className="w-full mt-auto pt-2">
                 <iframe 
                   src="https://open.spotify.com/embed/track/7ghKr0pCYyPPyp7t1FH8k4?si=ef77d0cd3abc4ede" 
                   width="100%"
-                  height="152" /* FIXED: Bumping from 80 to 152 enables Spotify's clean vertical block style card */
+                  height="152" 
                   allowFullScreen={false} 
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
                   loading="lazy"
@@ -145,7 +142,6 @@ export default function ProfilePage() {
               </div>
               
               <div className="games-list">
-                {/* Favorite Item 1 */}
                 <div className="game-item">
                   <div className="w-8 h-8 rounded bg-gradient-to-br from-[#e5729f]/20 to-purple-900/40 flex items-center justify-center text-[10px] font-mono text-[#f26e8c] font-bold border border-[#f26e8c]/20 shrink-0">
                     LP
@@ -156,7 +152,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Favorite Item 2 */}
                 <div className="game-item">
                   <div className="w-8 h-8 rounded bg-gradient-to-br from-[#e5729f]/20 to-purple-900/40 flex items-center justify-center text-[10px] font-mono text-[#f26e8c] font-bold border border-[#f26e8c]/20 shrink-0">
                     SYN
@@ -179,7 +174,6 @@ export default function ProfilePage() {
                 </p>
               </div>
               
-              {/* Polished Grid Links Track */}
               <div className="grid grid-cols-2 gap-3 mt-6">
                 <a 
                   href="https://spotify.com" 

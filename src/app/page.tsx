@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+// FIXED: Imported Variants from framer-motion
+import { motion, Variants } from "framer-motion";
 import Navbar from "@/components/Navbar";
 
 export default function Home() {
@@ -33,12 +34,14 @@ export default function Home() {
     setBars(generatedBars);
   }, []);
 
-  const fadeInUp = {
+  // FIXED: Explicitly typed as Variants
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };
 
-  const staggerContainer = {
+  // FIXED: Explicitly typed as Variants
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.12 } }
   };
