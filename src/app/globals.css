@@ -618,16 +618,12 @@
         .gallery-control-btn.left { left: 8px; }
         .gallery-control-btn.right { right: 8px; }
 
-        /* ==========================================================================
-       MOBILE RESPONSIVENESS OVERRIDES
-       ========================================================================== */
-    @media (max-width: 768px) {
         .footer-content {
             display: flex;
             flex-direction: column;
             justify-content: center;
             gap: 1.5rem;
-            padding-bottom: 80px; /* Adds clearance so the mobile player doesn't block links */
+            padding-bottom: 80px;
         }
         
         .footer-basics {
@@ -640,19 +636,16 @@
             padding: 100px 1.25rem 3rem 1.25rem !important;
         }
 
-        /* 2. Compact the Global Player pill so it fits perfectly on phones */
         .master-global-player {
             width: 95% !important;
             bottom: 16px !important;
-            padding: 0 1rem !important; /* Reduces side padding to free up space */
+            padding: 0 1rem !important; 
         }
 
-        /* 3. Hide the timeline timestamps (0:45 / 3:28) on mobile to give the play buttons room */
         .master-global-player .font-mono.text-zinc-500.w-6 {
             display: none !important;
         }
 
-        /* 4. Shrink the track text so long song names don't overlap the controls */
         .master-global-player h4 {
             font-size: 0.75rem !important;
         }
@@ -660,17 +653,14 @@
             font-size: 9px !important;
         }
 
-        /* 5. Shrink the control buttons slightly */
         .player-ctrl-btn {
             padding: 4px !important;
             font-size: 0.9rem !important;
         }
 
-        /* 6. Ensure the album art cover scales down slightly */
         .master-global-player .w-11.h-11 {
             width: 36px !important;
             height: 36px !important;
         }
-    }
-    }
-}
+    } /* <-- THIS BRACKET CLOSES THE MEDIA QUERY */
+} /* <-- THIS BRACKET CLOSES THE @layer utilities */

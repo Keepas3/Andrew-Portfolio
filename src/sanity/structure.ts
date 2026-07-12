@@ -9,13 +9,20 @@ export const structure: StructureResolver = (S) =>
       // 1. Profile / Homepage (Forced into first place)
       S.listItem()
         .title('Profile')
-        .schemaType('profile'),
+        .schemaType('profile')
+        .child(
+          S.editor()
+            .id('profile')
+            .schemaType('profile')
+            .documentId('profile')
+            .title('Profile')
+        ),
       // 4. Active Projects
       S.listItem()
         .title('Album')
         .schemaType('album')
         .child(S.documentTypeList('album').title('Albums')),
-      
+
       // 5. Gallery
       S.listItem()
         .title('Gallery')
@@ -24,5 +31,4 @@ export const structure: StructureResolver = (S) =>
           S.documentTypeList('galleryTopic')
             .title('Albums & Archives')
         ),
-    
     ])

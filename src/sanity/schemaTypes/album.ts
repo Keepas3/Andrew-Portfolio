@@ -3,114 +3,94 @@ import { defineType, defineField } from 'sanity';
 export default defineType({
   name: 'album',
   type: 'document',
-  title: 'Discography Settings',
+  title: 'Albums & Projects', // This changes the name of the section in the Studio
   fields: [
     defineField({
-      name: 'pageTitle',
+      name: 'title',
       type: 'string',
-      title: 'Section / Page Title',
-      description: 'e.g., Discography & Architecture, Releases, Music',
-      initialValue: 'Discography & Architecture'
+      title: 'Album / Project Title',
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'albumList',
+      name: 'subtitle',
+      type: 'string',
+      title: 'Card Subtitle / Label',
+    }),
+    defineField({
+      name: 'slug',
+      type: 'slug',
+      title: 'URL Route Extension',
+      description: 'Unique link identifier. Click "Generate" after typing a title.',
+      options: {
+        source: 'title', // Pulls directly from the document title now
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'image',
+      type: 'image',
+      title: 'Square Album Jacket Art (Optional)',
+      description: 'Leave empty to use a default placeholder.',
+      options: { hotspot: true }
+    }),
+    defineField({
+      name: 'description',
+      type: 'text',
+      title: 'Album Summary Description',
+    }),
+    defineField({
+      name: 'projectLink',
+      type: 'url',
+      title: 'Link to Album or video etc. (Optional)',
+    }),
+    /* ─── ARRAY FOR SONGS & MEDIA UPLOADS ─── */
+    defineField({
+      name: 'tracks',
       type: 'array',
-      title: 'Albums & Projects Catalog',
-      description: 'Add your individual albums or project cards here. Drag to rearrange their position in the display grid.',
+      title: 'Tracklist & Media Files',
+      description: 'Add the songs and files that belong to this specific album.',
       of: [
         {
           type: 'object',
-          name: 'albumItem',
-          title: 'Catalog Entry',
+          name: 'trackItem',
+          title: 'Track Entry',
           fields: [
-            defineField({
-              name: 'title',
-              type: 'string',
-              title: 'Album / Project Title',
-              description: 'e.g., Colorful World!!, Beloved Blessings',
-              validation: (Rule) => Rule.required(),
+            defineField({ 
+              name: 'trackNumber', 
+              type: 'string', 
+              title: 'Track Number (e.g., 01)' 
+            }),
+            defineField({ 
+              name: 'name', 
+              type: 'string', 
+              title: 'Song or Module Name' 
+            }),
+            defineField({ 
+              name: 'duration', 
+              type: 'string', 
+              title: 'Length of song (ex: 3:42)' 
             }),
             defineField({
-              name: 'subtitle',
-              type: 'string',
-              title: 'Card Subtitle / Circle Label',
-              description: 'e.g., Kashiwade 1st EP, Original Soundtrack, EDM Single',
-            }),
-            defineField({
-              name: 'slug',
-              type: 'slug',
-              title: 'URL Route Extension',
-              description: 'Unique link identifier. Click "Generate" after typing a title.',
+              name: 'mediaFile',
+              type: 'file',
+              title: 'Media Upload (Audio / MP4)',
+              description: 'Upload the actual playable track or video file here.',
               options: {
-                source: (doc: any, options: { parent: any }) => options.parent?.title,
-                maxLength: 96,
-              },
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'image',
-              type: 'image',
-              title: 'Square Album Jacket Art',
-              description: 'Upload a 1:1 square image here to keep the grid perfectly uniform.',
-              options: { hotspot: true },
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'description',
-              type: 'text',
-              title: 'Album Summary Description',
-              description: 'A brief backstory shown on the main card or detailed splash page.',
-            }),
-            defineField({
-              name: 'category',
-              type: 'string',
-              title: 'Filter Category',
-              options: {
-                list: [
-                  { title: 'Music', value: 'music' },
-                  { title: 'Development', value: 'development' },
-                  { title: 'Design', value: 'design' },
-                  { title: 'Chess', value: 'chess' }
-                ],
-              },
-              initialValue: 'music'
-            }),
-            defineField({
-              name: 'projectLink',
-              type: 'url',
-              title: 'External Listen / View Link (Optional)',
-              description: 'Link straight to a Spotify album or GitHub repository source.',
-            }),
-            /* ─── ARRAY FOR SONGS & TRACK RUNTIMES ─── */
-            defineField({
-              name: 'tracks',
-              type: 'array',
-              title: 'Tracklist / Features Breakdown',
-              description: 'Add the items that appear when this jacket card is opened.',
-              of: [
-                {
-                  type: 'object',
-                  name: 'trackItem',
-                  title: 'Track Entry',
-                  fields: [
-                    { name: 'trackNumber', type: 'string', title: 'Track / Index Number (e.g., 01)' },
-                    { name: 'name', type: 'string', title: 'Song or Module Name' },
-                    { name: 'duration', type: 'string', title: 'Length / Spec Info (e.g., 3:42 or v1.0.5)' }
-                  ]
-                }
-              ]
+                accept: 'audio/*,video/mp4,video/webm' 
+              }
             })
-          ],
-          /* Studio Preview Configuration */
-          preview: {
-            select: {
-              title: 'title',
-              subtitle: 'subtitle',
-              media: 'image'
-            }
-          }
+          ]
         }
       ]
-    }) // ◄ FIXED: Removed the stray trailing comma from right here that was breaking compilation!
-  ]
+    })
+  ],
+  /* Studio Preview Configuration */
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'topic', // This will display the Genre (e.g., "Heavy Bass") right under the title in the left sidebar!
+      media: 'image'
+    }
+  }
 });
