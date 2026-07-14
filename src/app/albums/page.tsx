@@ -125,7 +125,7 @@ export default function AlbumsDirectory() {
                     
                     {/* FIXED: Added !text-zinc-400 to force the subtitle color */}
                     {(album.subtitle || album.description) && (
-                      <p className="text-[12px] md:text-[13px] !text-zinc-400 mt-1 line-clamp-1 font-medium m-0">
+                      <p className="text-[12px] md:text-[13px] text-[#ACDDDE] !text-zinc-400 mt-1 line-clamp-1 font-medium m-0">
                         {album.subtitle || album.description}
                       </p>
                     )}

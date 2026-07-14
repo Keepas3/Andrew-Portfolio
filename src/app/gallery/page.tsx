@@ -127,7 +127,7 @@ export default function GalleryPage() {
              VIEW 1: 3D COVER FLOW FAN CAROUSEL
              ========================================= */
           <div className="albums-view animate-fade-in mt-2 flex flex-col items-center select-none w-full" style={{ overflow: 'visible' }}>
-            <p className="text-center text-white/50 text-sm font-mono tracking-widest uppercase mb-10">Select an topic to explore</p>
+            <p className="text-center text-white/50 text-sm font-mono tracking-widest uppercase mb-10">Select a topic to explore</p>
 
             {topics.length === 0 ? (
               <p className="text-center text-white/30 italic">No albums created yet.</p>

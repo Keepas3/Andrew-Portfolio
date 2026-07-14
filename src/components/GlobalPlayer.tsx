@@ -20,12 +20,9 @@ interface Track {
 }
 
 export default function GlobalPlayer() {
-  const waveBars = Array.from({ length: 10 });
   const popupRef = useRef<HTMLDivElement>(null);
-  
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // --- NEW: Invisible Web Audio API Refs for the Visualizer ---
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -44,7 +41,6 @@ export default function GlobalPlayer() {
   
   const [volume, setVolume] = useState(1);
 
-  // --- NEW: Initialize Audio Context for the Visualizer ---
   const initAudioContext = () => {
     if (!audioCtxRef.current && audioRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -73,11 +69,11 @@ export default function GlobalPlayer() {
         const data = await client.fetch(`
           *[_type == "album" && defined(tracks)] {
             "albumTitle": title,
-            "albumArtist": subtitle,
             "image": image.asset->url,
             tracks[]{
               name,
               duration,
+              albumArtist,
               "mediaUrl": mediaFile.asset->url
             }
           }
@@ -91,7 +87,7 @@ export default function GlobalPlayer() {
               if (track.mediaUrl) { 
                 masterList.push({
                   title: track.name,
-                  artist: album.albumArtist || "Unknown Artist", 
+                  artist: track.albumArtist || album.subtitle || "Unknown Artist", 
                   album: album.albumTitle,
                   durationString: track.duration,
                   image: album.image,
@@ -119,7 +115,7 @@ export default function GlobalPlayer() {
     if (playlist.length > 0) {
       setCurrentTrack(playlist[trackIndex]);
       if (isPlaying && audioRef.current) {
-        initAudioContext(); // Initialize context when track changes
+        initAudioContext();
         setTimeout(() => audioRef.current?.play().catch(e => console.log(e)), 50);
       }
     }
@@ -128,7 +124,7 @@ export default function GlobalPlayer() {
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        initAudioContext(); // Initialize context on play
+        initAudioContext();
         audioRef.current.play().catch(e => {
           console.log("Browser prevented autoplay", e);
           setIsPlaying(false);
@@ -139,17 +135,14 @@ export default function GlobalPlayer() {
     }
   }, [isPlaying]);
 
-  // 1. Listen for the click from the Homepage
   useEffect(() => {
     const handleToggle = () => setIsPlaying(prev => !prev);
     window.addEventListener('toggle-global-audio', handleToggle);
     return () => window.removeEventListener('toggle-global-audio', handleToggle);
   }, []);
 
-  // 2. Broadcast to the Homepage whenever it starts or stops playing
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Save the state globally so new pages know it's playing immediately on load
       (window as any).isGlobalAudioPlaying = isPlaying;
       window.dispatchEvent(new CustomEvent('global-audio-state', { detail: isPlaying }));
     }
@@ -234,7 +227,6 @@ export default function GlobalPlayer() {
   return (
     <div className="master-global-player pl-6 pr-8 shadow-[0_15px_50px_rgba(0,0,0,0.8)]">
       
-      {/* FIXED: crossOrigin="anonymous" is required to analyze Sanity audio URLs */}
       <audio 
         ref={audioRef}
         src={currentTrack.src}
@@ -244,7 +236,6 @@ export default function GlobalPlayer() {
         onEnded={handleNext}
       />
   
-      {/* LEFT SIDE: Artwork & Metadata */}
       <div className="player-left-meta flex items-center w-[32%] min-w-[220px]">
         <div 
           style={{ width: '50px', height: '50px', minWidth: '50px', marginLeft: '12px' }} 
@@ -263,11 +254,13 @@ export default function GlobalPlayer() {
         </div>
         <div className="flex flex-col min-w-0" style={{ marginLeft: '16px', gap: '6px' }}>
           <h4 className="truncate m-0 text-white font-bold tracking-wide">{currentTrack.title}</h4>
-          <p className="truncate m-0 font-mono text-zinc-400">{currentTrack.album}</p>
+          {/* FIXED: Now displays Artist • Album */}
+          <p className="truncate m-0 font-mono text-zinc-400 text-[10px]">
+            {currentTrack.artist} <span className="opacity-50 mx-1">•</span> {currentTrack.album}
+          </p>
         </div>
       </div>
 
-      {/* CENTER ROW: Controls & Progress */}
       <div className="player-center-row flex-1 px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-4 shrink-0 mb-0.5">
           <button onClick={() => setIsShuffle(!isShuffle)} className={`player-ctrl-btn text-sm ${isShuffle ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiShuffle /></button>
@@ -279,7 +272,6 @@ export default function GlobalPlayer() {
           <button onClick={() => setIsRepeat(!isRepeat)} className={`player-ctrl-btn text-sm ${isRepeat ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiRepeat /></button>
         </div>
         
-        {/* INTERACTIVE SEEK BAR */}
         <div className="w-full flex items-center px-1 sm:px-2" style={{ width: '100%', maxWidth: '100%' }}>
           <span
             className="text-[10px] font-mono text-zinc-300 min-w-[44px] shrink-0 select-none text-right"
@@ -318,7 +310,6 @@ export default function GlobalPlayer() {
         </div>
       </div>
 
-      {/* RIGHT SIDE: Equalizer, Volume & Dropdown */}
       <div className="player-right-controls flex items-center gap-3 relative w-[26%] justify-start shrink-0 ml-0 mt-2 pr-0">
         <div className="flex items-center gap-2 rounded-full bg-[rgba(56,189,248,0.08)] backdrop-blur-md px-2.5 py-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.25)] mr-2 translate-x-[-10px] translate-y-[6px]">
           <button 
@@ -339,10 +330,10 @@ export default function GlobalPlayer() {
         </div>
 
         <div className="flex items-center gap-2 border-l border-white/10 pl-3 h-6 translate-y-[2px]">
-          <button onClick={() => setIsListOpen(!isListOpen)} className={`player-ctrl-btn text-sm ${isListOpen ? 'text-[#38bdf8]' : ''}`}><FiList /></button>
+          <button onClick={() => setIsListOpen(!isListOpen)} className={`player-ctrl-btn text-sm transition-colors ${isListOpen ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : 'hover:text-white'}`}><FiList /></button>
         </div>
 
-        {/* Dynamic Selector Dropdown Popup */}
+        {/* --- FIXED QUEUE POPUP --- */}
         <AnimatePresence>
           {isListOpen && (
             <motion.div 
@@ -350,11 +341,26 @@ export default function GlobalPlayer() {
               initial={{ opacity: 0, y: 15, scale: 0.95 }} 
               animate={{ opacity: 1, y: 0, scale: 1 }} 
               exit={{ opacity: 0, y: 10, scale: 0.95 }} 
-              transition={{ duration: 0.15 }} 
-              className="queue-popup absolute bottom-20 right-0 w-72 h-[320px] overflow-hidden bg-[#030712]/95 border border-white/10 rounded-xl p-2 shadow-2xl z-[999999] backdrop-blur-md"
+              transition={{ duration: 0.2, ease: "easeOut" }} 
+              // FIXED: Replaced bottom-20 with bottom-full mb-6 to guarantee it NEVER clips the bottom screen
+              className="queue-popup absolute bottom-full mb-6 right-0 w-80 h-[380px] flex flex-col bg-[#050505]/95 border border-white/10 rounded-2xl p-3 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-[999999] backdrop-blur-xl"
             >
-              <p className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase px-2 py-1 border-b border-white/5 mb-2">Queue Directory</p>
-              <div className="flex flex-col gap-1 h-[calc(320px-3.5rem)] overflow-y-auto overflow-x-hidden overscroll-contain pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              
+              {/* CLEAN HEADER */}
+              <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/5 shrink-0 px-2">
+                <p className="text-[10px] font-mono tracking-[0.2em] text-[#38bdf8] uppercase font-bold">Queue Directory</p>
+                <span className="text-[10px] font-mono text-zinc-500">{playlist.length} Tracks</span>
+              </div>
+
+              {/* CLEAN CUSTOM SCROLLBAR */}
+              <div className="flex flex-col gap-1.5 h-full overflow-y-auto overflow-x-hidden overscroll-contain pr-1.5 
+                [&::-webkit-scrollbar]:w-[6px] 
+                [&::-webkit-scrollbar-track]:bg-transparent 
+                [&::-webkit-scrollbar-thumb]:bg-white/10 
+                [&::-webkit-scrollbar-thumb]:rounded-full 
+                hover:[&::-webkit-scrollbar-thumb]:bg-white/20 
+                transition-colors"
+              >
                 {playlist.map((track, index) => {
                   const isActive = currentTrack.title === track.title;
                   return (
@@ -365,27 +371,31 @@ export default function GlobalPlayer() {
                         setIsPlaying(true); 
                         setIsListOpen(false); 
                       }} 
-                      className={`w-full text-left p-2 rounded-lg flex items-center gap-3 transition-colors ${
-                        isActive ? 'bg-[#38bdf8]/15 border border-[#38bdf8]/20' : 'bg-transparent border border-transparent hover:bg-white/5'
+                      className={`w-full text-left p-2 rounded-xl flex items-center gap-3 transition-all duration-200 group ${
+                        isActive ? 'bg-[#38bdf8]/10 border border-[#38bdf8]/20 shadow-[inset_0_0_15px_rgba(56,189,248,0.05)]' : 'bg-transparent border border-transparent hover:bg-white/5'
                       }`}
                     >
-                      <div style={{ width: '32px', height: '32px', minWidth: '32px' }} className="bg-black rounded-full shrink-0 overflow-hidden flex items-center justify-center p-0 m-0 border-0 shadow-sm">
+                      <div style={{ width: '36px', height: '36px', minWidth: '36px' }} className="bg-black rounded-full shrink-0 overflow-hidden flex items-center justify-center p-0 m-0 border-0 shadow-sm relative">
                         {track.image && (
                           <img 
                             src={track.image} 
                             alt="" 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            className="rounded-full block" 
+                            className={`rounded-full block transition-transform duration-500 ${isActive && isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`} 
                             onError={(e) => { e.currentTarget.style.display = 'none'; }} 
                           />
                         )}
+                        {/* Tiny center dot to make spinning record look better */}
+                        {isActive && <div className="absolute w-2 h-2 bg-black rounded-full border border-zinc-800" />}
                       </div>
+                      
                       <div className="min-w-0 flex-1">
-                        <p className={`text-xs font-semibold truncate m-0 ${isActive ? 'text-[#38bdf8]' : 'text-zinc-200 group-hover:text-white'}`}>
+                        <p className={`text-[13px] font-bold truncate m-0 ${isActive ? 'text-[#38bdf8]' : 'text-zinc-200 group-hover:text-white'}`}>
                           {track.title}
                         </p>
-                        <p className={`text-[10px] truncate m-0 font-normal mt-0.5 ${isActive ? 'text-[#38bdf8]/70' : 'text-zinc-500'}`}>
-                          {track.artist}
+                        {/* FIXED: Displays Artist • Album with slightly faded separator */}
+                        <p className={`text-[10px] font-mono truncate m-0 font-normal mt-0.5 ${isActive ? 'text-[#38bdf8]/70' : 'text-zinc-500'}`}>
+                          {track.artist} <span className="opacity-50 mx-1">•</span> {track.album}
                         </p>
                       </div>
                     </button>

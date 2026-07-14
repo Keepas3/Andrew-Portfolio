@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 interface Track {
   trackNumber: string;
   name: string;
-  duration: string;
+  albumArtist: string;
   mediaUrl?: string;
 }
 
@@ -43,7 +43,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
             tracks[]{
               trackNumber,
               name,
-              duration,
+              albumArtist,
               "mediaUrl": mediaFile.asset->url
             }
           }
@@ -257,7 +257,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                               </span>
                             </div>
                             <span style={{ color: '#a1a1aa', fontSize: '12px', fontFamily: 'monospace' }}>
-                              {track.duration}
+                              {track.albumArtist || "Unknown Artist"}
                             </span>
                           </div>
 
@@ -290,23 +290,6 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
         </div>
       </main>
 
-      <footer className="w-full border-t border-white/5 bg-black/40 backdrop-blur-md px-8 md:px-16 py-6 z-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between w-full font-sans text-xs font-bold uppercase tracking-[0.25em]">
-          <Link 
-            href="/albums"
-            style={{ display: 'flex', alignItems: 'center', color: '#71717a', textDecoration: 'none' }}
-          >
-            <span style={{ fontSize: '16px', marginRight: '8px', lineHeight: 1 }}>←</span> Next
-          </Link>
-          
-          <Link 
-            href="/albums"
-            style={{ display: 'flex', alignItems: 'center', color: '#71717a', textDecoration: 'none' }}
-          >
-            Previous <span style={{ fontSize: '16px', marginLeft: '8px', lineHeight: 1 }}>→</span>
-          </Link>
-        </div>
-      </footer>
     </div>
   );
 }

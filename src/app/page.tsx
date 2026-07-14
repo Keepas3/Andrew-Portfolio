@@ -24,8 +24,8 @@ export default function Home() {
   
   useEffect(() => {
     const handleResize = () => {
-      // 32 bars for mobile, 64 bars for desktop
-      setTotalBars(window.innerWidth < 768 ? 32 : 80);
+      // 32 bars for mobile, 96 (or 80) bars for desktop
+      setTotalBars(window.innerWidth < 768 ? 32 : 96);
     };
     
     window.addEventListener('resize', handleResize);
@@ -67,23 +67,24 @@ export default function Home() {
           if (barsRef.current[i]) {
             const centerDist = Math.abs(i - trueCenter);
 
-            // Tweak the multiplier for 96 bars so we stay in the bass/mid frequency range
             const multiplier = totalBars <= 32 ? 4.5 : 2.0;
             const binIndex = Math.floor(centerDist * multiplier);
             const rawValue = dataArray[binIndex] || 0;
 
             let normalized = rawValue / 255;
             
-            // 1. DYNAMIC CURVE: Increased from 1.8 to 2.4. 
-            // This severely squashes quiet background noises and forces heavy beats to spike aggressively.
-            let dynamicCurve = Math.pow(normalized, 2.4);
+            // FIXED: Split the Dynamic Curve. 
+            // Mobile (2.8) ignores build-up noise and only spikes on drops. Desktop stays at 2.4.
+            const curveExponent = totalBars <= 32 ? 2.8 : 2.4;
+            let dynamicCurve = Math.pow(normalized, curveExponent);
             
-            // 2. EDGE DAMPENER: Increased from 0.15 to 0.70. 
-            // This pushes the extreme outer edges down by 70%, forcing a steep "mountain" shape in the middle.
             const edgeDampener = 1 - (centerDist / trueCenter) * 0.70;
 
-            // 3. HEIGHT BOOST: Increased multiplier to 110 to give the center spikes extra reach
-            const percent = Math.max(2, Math.min(100, dynamicCurve * 110 * edgeDampener));
+            // FIXED: Split the Height Boost.
+            // Mobile (80) prevents it from slamming the top of the screen. Desktop stays at 110.
+            const heightBoost = totalBars <= 32 ? 80 : 110;
+            const percent = Math.max(2, Math.min(100, dynamicCurve * heightBoost * edgeDampener));
+            
             barsRef.current[i]!.style.height = `${percent}%`;
           }
         }
@@ -151,7 +152,6 @@ export default function Home() {
     <div className="relative min-h-screen bg-transparent">
       <Navbar />
 
-      {/* FIXED: The absolute background now perfectly matches the Hero height (80vh mobile, 65vh desktop) */}
       <div className="absolute top-0 left-0 w-full h-[80vh] md:h-[65vh] min-h-[450px] pointer-events-none z-0 flex flex-col justify-end">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[90vw] md:w-[80vw] h-[50vh] bg-[#38bdf8]/20 blur-[130px] rounded-full z-0" />
         <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8]/40 to-transparent absolute bottom-0 z-20" />
@@ -165,7 +165,6 @@ export default function Home() {
               }}
               className="bg-gradient-to-t from-[#38bdf8] via-[#0ea5e9]/70 to-transparent rounded-t-[2px]"
               style={{ 
-                /* FIXED: flex: 1 tells the bars to stretch. minWidth ensures they don't vanish. maxWidth stops them from looking super fat on ultrawide monitors. */
                 flex: 1, 
                 minWidth: '4px',
                 maxWidth: totalBars <= 32 ? '14px' : '20px', 
@@ -179,7 +178,6 @@ export default function Home() {
 
       <div className="page-container relative z-10">
         
-        {/* FIXED: The Hero section is now fully synced with the absolute background above. No more clipping! */}
         <motion.section 
           initial="hidden"
           animate="visible"
@@ -187,13 +185,13 @@ export default function Home() {
           className="w-full h-[80vh] md:h-[65vh] min-h-[450px] flex flex-col items-center justify-center text-center p-8"
         >
           <div className="flex flex-col items-center gap-2 max-w-3xl p-6 mt-12 md:mt-0">
-            <span className="text-xs md:text-sm font-mono uppercase tracking-[0.4em] text-[#38bdf8] font-bold">
+            <span className="text-xs md:text-sm font-mono uppercase tracking-[0.4em] text-[#38bdf8]/80 font-bold">
               Real-Time Audio Visualizer
             </span>
-            <h1 className="text-6xl md:text-8xl font-serif font-bold tracking-tight text-white leading-tight mt-2 drop-shadow-lg">
-              Portfolio Site 
+            <h1 className="text-5xl md:text-8xl font-serif font-bold tracking-tighter text-[#ADD8E6] drop-shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
+              Sound Archives
             </h1>
-            <p className="text-base md:text-lg text-zinc-300 max-w-lg mx-auto mt-4 font-normal leading-relaxed drop-shadow-md">
+            <p className="text-base md:text-lg text-zinc-300 max-w-lg mx-auto mt-4 font-normal text-[#D3D3D3] leading-relaxed drop-shadow-md">
               Synced with the Song Playing in the Player Below. 
             </p>
             
@@ -202,7 +200,7 @@ export default function Home() {
               className="mt-8 px-8 py-3.5 flex items-center justify-center gap-3 border-none outline-none bg-[#38bdf8]/10 text-[#38bdf8] hover:bg-[#38bdf8]/20 font-bold text-xs uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-105 pointer-events-auto shadow-[0_0_20px_rgba(56,189,248,0.2)] border border-[#38bdf8]/30"
             >
               {isGlobalPlaying ? <FiPause size={18} className="fill-[#38bdf8]" /> : <FiPlay size={18} className="fill-[#38bdf8] translate-x-[1px]" />}
-              {isGlobalPlaying ? "Pause Stream" : "Start Stream"}
+              {isGlobalPlaying ? "Pause Stream" : "Listen Now"}
             </button>
 
           </div>
