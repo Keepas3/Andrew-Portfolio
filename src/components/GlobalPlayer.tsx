@@ -276,7 +276,7 @@ export default function GlobalPlayer() {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="master-global-player pl-6 pr-8 shadow-[0_15px_50px_rgba(0,0,0,0.8)]"
+            className="master-global-player max-w-5xl mx-auto rounded-t-2xl pl-6 pr-8 shadow-[0_15px_50px_rgba(0,0,0,0.8)]"
           >
             <div className="player-left-meta flex items-center w-[32%] min-w-[220px]">
               <div 
@@ -295,7 +295,7 @@ export default function GlobalPlayer() {
                 )}
               </div>
               <div className="flex flex-col min-w-0" style={{ marginLeft: '16px', gap: '6px' }}>
-                <h4 className="truncate m-0 text-white font-bold tracking-wide">{currentTrack.title}</h4>
+                <h4 className="truncate max-w-[180px] m-0 text-white font-bold tracking-wide">{currentTrack.title}</h4>
                 <p className="truncate m-0 font-mono text-zinc-400 text-[10px]">
                   {currentTrack.artist} <span className="opacity-50 mx-1">•</span> {currentTrack.album}
                 </p>
