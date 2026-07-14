@@ -295,17 +295,43 @@ export default function GalleryPage() {
               
               {/* FIXED: Added 'flex-1' so this left box takes up exactly equal space as the right box */}
               <div className="flex-1 flex justify-start">
+              <div style={{ marginBottom: '2.5rem' }}>
                 <button 
-                  onClick={closeTopic} 
-                  className="group flex items-center justify-center p-1 transition-all duration-200 ease-in-out hover:-translate-x-1.5 outline-none bg-transparent border-none cursor-pointer"
-                  style={{ textDecoration: 'none' }} 
-                  title="Back to albums"
+                  onClick={closeTopic}
+                  className="group"
+                  style={{ 
+                    color: '#9ca3af', 
+                    textDecoration: 'none', 
+                    fontSize: '14px', 
+                    letterSpacing: '2px', 
+                    textTransform: 'uppercase', 
+                    fontWeight: 'bold',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                    transition: 'color 0.2s ease-in-out'
+                  }}
+                  // Optional: Add a simple hover effect for the text
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#a855f7" className="transition-all duration-200 ease-in-out hover:brightness-125 drop-shadow-[0_2px_10px_rgba(168,85,247,0.3)]" style={{ width: '28px', height: '28px' }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                  </svg>
+                  <span 
+                    style={{ 
+                      fontSize: '18px', 
+                      marginRight: '8px', 
+                      lineHeight: 1 
+                    }}
+                    className="group-hover:-translate-x-1 transition-transform duration-200"
+                  >
+                    ←
+                  </span> 
+                  Back To Gallery
                 </button>
               </div>
+            </div>
               
               {/* The title will now naturally rest in the exact center of the page */}
               <h2 className="text-xl md:text-3xl font-serif font-bold text-white tracking-wide drop-shadow-lg text-center whitespace-nowrap">

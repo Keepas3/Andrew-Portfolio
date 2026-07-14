@@ -103,7 +103,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
               style={{ 
                 color: '#9ca3af', 
                 textDecoration: 'none', 
-                fontSize: '12px', 
+                fontSize: '14px', 
                 letterSpacing: '2px', 
                 textTransform: 'uppercase', 
                 fontWeight: 'bold',

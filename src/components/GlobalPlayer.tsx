@@ -25,6 +25,11 @@ export default function GlobalPlayer() {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // --- NEW: Invisible Web Audio API Refs for the Visualizer ---
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+
   const [playlist, setPlaylist] = useState<Track[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -38,6 +43,29 @@ export default function GlobalPlayer() {
   const [duration, setDuration] = useState(0);
   
   const [volume, setVolume] = useState(1);
+
+  // --- NEW: Initialize Audio Context for the Visualizer ---
+  const initAudioContext = () => {
+    if (!audioCtxRef.current && audioRef.current) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtxRef.current = new AudioContextClass();
+      analyserRef.current = audioCtxRef.current.createAnalyser();
+      
+      analyserRef.current.fftSize = 512;
+      analyserRef.current.smoothingTimeConstant = 0.8;
+
+      sourceRef.current = audioCtxRef.current.createMediaElementSource(audioRef.current);
+      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(audioCtxRef.current.destination);
+
+      (window as any).globalAudioAnalyser = analyserRef.current;
+      (window as any).globalAudioDataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    }
+    
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+  };
 
   useEffect(() => {
     const fetchAllTracks = async () => {
@@ -91,6 +119,7 @@ export default function GlobalPlayer() {
     if (playlist.length > 0) {
       setCurrentTrack(playlist[trackIndex]);
       if (isPlaying && audioRef.current) {
+        initAudioContext(); // Initialize context when track changes
         setTimeout(() => audioRef.current?.play().catch(e => console.log(e)), 50);
       }
     }
@@ -99,6 +128,7 @@ export default function GlobalPlayer() {
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
+        initAudioContext(); // Initialize context on play
         audioRef.current.play().catch(e => {
           console.log("Browser prevented autoplay", e);
           setIsPlaying(false);
@@ -106,6 +136,22 @@ export default function GlobalPlayer() {
       } else {
         audioRef.current.pause();
       }
+    }
+  }, [isPlaying]);
+
+  // 1. Listen for the click from the Homepage
+  useEffect(() => {
+    const handleToggle = () => setIsPlaying(prev => !prev);
+    window.addEventListener('toggle-global-audio', handleToggle);
+    return () => window.removeEventListener('toggle-global-audio', handleToggle);
+  }, []);
+
+  // 2. Broadcast to the Homepage whenever it starts or stops playing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Save the state globally so new pages know it's playing immediately on load
+      (window as any).isGlobalAudioPlaying = isPlaying;
+      window.dispatchEvent(new CustomEvent('global-audio-state', { detail: isPlaying }));
     }
   }, [isPlaying]);
 
@@ -188,9 +234,11 @@ export default function GlobalPlayer() {
   return (
     <div className="master-global-player pl-6 pr-8 shadow-[0_15px_50px_rgba(0,0,0,0.8)]">
       
+      {/* FIXED: crossOrigin="anonymous" is required to analyze Sanity audio URLs */}
       <audio 
         ref={audioRef}
         src={currentTrack.src}
+        crossOrigin="anonymous" 
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleNext}
@@ -239,7 +287,6 @@ export default function GlobalPlayer() {
           >
             {formatTime(currentTime)}
           </span>
-          {/* FIXED: Using strict inline RGBA so Tailwind cache cannot ignore it. Highly visible white/gray rail. */}
           <div 
             className="h-[5px] rounded-full relative cursor-pointer group/progress transition-all duration-200"
             style={{

@@ -183,8 +183,9 @@
        ========================================================================== */
     .projects-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 1.75rem;
+        /* Bite-sized grid: naturally shrinks cards to 180px minimum */
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
         width: 100%;
     }
 
@@ -199,42 +200,52 @@
         text-decoration: none !important;
     }
 
+    /* Cyan Hover for Latest Releases */
     .project-card:hover {
         transform: translateY(-4px);
         border-color: rgba(56, 189, 248, 0.25);
     }
 
-    /* ─── FIXED: EXPLICIT IMAGE FOOTPRINT CLAMP ─── */
+    /* Amber Hover for WIP Logs */
+    .project-card.wip-card:hover {
+        border-color: rgba(245, 158, 11, 0.3);
+    }
+
     .project-card img {
         width: 100% !important;
         height: auto !important;
-        aspect-ratio: 1 / 1 !important; /* Forces standard square record jacket geometry */
-        object-fit: cover !important; /* Prevents stretching or squishing */
+        aspect-ratio: 1 / 1 !important; 
+        object-fit: cover !important; 
         display: block;
     }
 
     .project-info {
-        padding: 1.25rem;
+        /* Extra padding so the text doesn't touch the image */
+        padding: 1.5rem 1.25rem;
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
-        background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
-    }
-
-    .project-info span.font-mono {
-        color: rgba(255, 255, 255, 0.4) !important;
-        font-size: 10px;
+        gap: 0.4rem;
+        background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.4));
     }
 
     .project-info h3 {
-        color: #ffffff !important;
-        font-size: 1.1rem;
+        /* FIXED: Changed from #ffffff to a soft slate-gray so hover colors pop more */
+        color: #a1a1aa; 
+        font-size: 0.95rem;
         font-weight: 700;
         transition: color 0.2s ease;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    /* Colorful Title Hover Effects */
     .project-card:hover .project-info h3 {
-        color: #38bdf8 !important; 
+        color: #38bdf8; 
+    }
+    .project-card.wip-card:hover .project-info h3 {
+        color: #f59e0b; 
     }
 
     .project-desc {
@@ -581,6 +592,7 @@
     color: #38bdf8;
     background: rgba(255, 255, 255, 0.03);
 }
+
     /* ==========================================================================
        MOBILE RESPONSIVENESS OVERRIDES
        ========================================================================== */
@@ -739,5 +751,18 @@
             width: 36px !important;
             height: 36px !important;
         }
+        .visualizer-container {
+        gap: 8px !important; 
+    }
+
+    /* Shrinks the visualizer height on mobile so it doesn't cover your text */
+    .visualizer-height-mobile {
+        height: 40vh !important;
+    }
+    
+    /* Makes the bars slightly wider on mobile for a 'chunky' look */
+    .mobile-bar-width {
+        max-width: 25px !important;
+    }
     } /* <-- THIS BRACKET CLOSES THE MEDIA QUERY */
 } /* <-- THIS BRACKET CLOSES THE @layer utilities */
