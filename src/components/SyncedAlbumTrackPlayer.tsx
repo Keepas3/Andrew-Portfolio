@@ -85,7 +85,7 @@ export default function SyncedAlbumTrackPlayer({
               flex: 1,
               height: "4px",
               cursor: "pointer",
-              accentColor: "#01f315",
+              accentColor: "#38bdf8",
             }}
           />
           <span
