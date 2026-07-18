@@ -34,7 +34,7 @@ export default function Navbar() {
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       {/* 2. Wrap your logo text in the Link pointing to "/" */}
       <div className="nav-logo">
-        <Link href="/">Andrew</Link>
+        <Link href="/">Sound Archives</Link>
       </div>
 
       <ul className="nav-links">

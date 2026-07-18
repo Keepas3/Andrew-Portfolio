@@ -153,26 +153,49 @@ export default function Home() {
       <Navbar />
 
       <div className="absolute top-0 left-0 w-full h-[80vh] md:h-[65vh] min-h-[450px] pointer-events-none z-0 flex flex-col justify-end">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[90vw] md:w-[80vw] h-[50vh] bg-[#38bdf8]/20 blur-[130px] rounded-full z-0" />
+        
+        {/* UPDATED: Multi-color dynamic glow background to match the vibrant bars */}
+        <div 
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[90vw] md:w-[80vw] h-[50vh] blur-[130px] rounded-full z-0" 
+          style={{ background: 'linear-gradient(90deg, rgba(56,189,248,0.15) 0%, rgba(168,85,247,0.15) 50%, rgba(236,72,153,0.15) 100%)' }}
+        />
+        
         <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8]/40 to-transparent absolute bottom-0 z-20" />
 
-        <div className="w-full h-full flex items-end justify-center px-4 md:px-12 gap-[3px] md:gap-[6px] absolute bottom-0 z-10 opacity-50 pb-[2px]">
-          {Array.from({ length: totalBars }).map((_, i) => (
-            <div
-              key={i}
-              ref={(el) => { 
-                if(el) barsRef.current[i] = el; 
-              }}
-              className="bg-gradient-to-t from-[#38bdf8] via-[#0ea5e9]/70 to-transparent rounded-t-[2px]"
-              style={{ 
-                flex: 1, 
-                minWidth: '4px',
-                maxWidth: totalBars <= 32 ? '14px' : '20px', 
-                height: "2%", 
-                transition: 'height 0.05s linear' 
-              }} 
-            />
-          ))}
+        {/* UPDATED: Increased base opacity from 50 to 80 so the colors truly pop */}
+        <div className="w-full h-full flex items-end justify-center px-4 md:px-12 gap-[3px] md:gap-[6px] absolute bottom-0 z-10 opacity-80 pb-[2px]">
+          {Array.from({ length: totalBars }).map((_, i) => {
+            // NEW: Calculate the bar's horizontal position percentage (0.0 to 1.0)
+            const ratio = i / (totalBars - 1 || 1);
+            
+            // Sweep hue from Cyan (190) -> Purple (270) -> Pink (330)
+            const hue = 190 + (ratio * 140); 
+            
+            const baseColor = `hsl(${hue}, 100%, 65%)`;
+            const midColor = `hsla(${hue}, 100%, 55%, 0.6)`;
+            const glowColor = `hsla(${hue}, 100%, 60%, 0.4)`;
+
+            return (
+              <div
+                key={i}
+                ref={(el) => { 
+                  if(el) barsRef.current[i] = el; 
+                }}
+                className="rounded-t-[2px]"
+                style={{ 
+                  flex: 1, 
+                  minWidth: '4px',
+                  maxWidth: totalBars <= 32 ? '14px' : '20px', 
+                  height: "2%", 
+                  transition: 'height 0.05s linear',
+                  
+               
+                  background: `linear-gradient(to top, ${baseColor}, ${midColor}, transparent)`,
+                  boxShadow: `0 0 12px ${glowColor}, 0 0 4px ${glowColor}`
+                }} 
+              />
+            );
+          })}
         </div>
       </div>
 

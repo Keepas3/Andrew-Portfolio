@@ -10,15 +10,7 @@ import {
   FiMinimize2, FiMaximize2 // NEW: Minimize and Maximize Icons
 } from "react-icons/fi";
 import { client } from '@/sanity/lib/client';
-
-interface Track {
-  title: string;
-  artist: string;
-  album: string;
-  durationString: string;
-  image: string;
-  src: string;
-}
+import type { GlobalTrack } from '@/lib/globalAudio';
 
 export default function GlobalPlayer() {
   const popupRef = useRef<HTMLDivElement>(null);
@@ -28,9 +20,9 @@ export default function GlobalPlayer() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
 
-  const [playlist, setPlaylist] = useState<Track[]>([]);
+  const [playlist, setPlaylist] = useState<GlobalTrack[]>([]);
   const [trackIndex, setTrackIndex] = useState(0);
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<GlobalTrack | null>(null);
   
   const [isPlaying, setIsPlaying] = useState(false); 
   const [isShuffle, setIsShuffle] = useState(false);
@@ -107,7 +99,7 @@ export default function GlobalPlayer() {
           }
         `);
 
-        let masterList: Track[] = [];
+        let masterList: GlobalTrack[] = [];
 
         data.forEach((album: any) => {
           if (album.tracks) {
@@ -165,9 +157,42 @@ export default function GlobalPlayer() {
 
   useEffect(() => {
     const handleToggle = () => setIsPlaying(prev => !prev);
+    const handlePlayTrack = (e: Event) => {
+      const track = (e as CustomEvent<GlobalTrack>).detail;
+      setPlaylist(prev => {
+        const index = prev.findIndex(t => t.src === track.src);
+        if (index >= 0) {
+          setTrackIndex(index);
+          return prev;
+        }
+        setTrackIndex(prev.length);
+        return [...prev, track];
+      });
+      setIsPlaying(true);
+    };
+    const handleSeek = (e: Event) => {
+      const { time } = (e as CustomEvent<{ time: number }>).detail;
+      if (audioRef.current) {
+        audioRef.current.currentTime = time;
+        setCurrentTime(time);
+      }
+    };
+
     window.addEventListener('toggle-global-audio', handleToggle);
-    return () => window.removeEventListener('toggle-global-audio', handleToggle);
+    window.addEventListener('play-global-track', handlePlayTrack);
+    window.addEventListener('seek-global-audio', handleSeek);
+    return () => {
+      window.removeEventListener('toggle-global-audio', handleToggle);
+      window.removeEventListener('play-global-track', handlePlayTrack);
+      window.removeEventListener('seek-global-audio', handleSeek);
+    };
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && currentTrack) {
+      window.dispatchEvent(new CustomEvent('global-audio-track', { detail: currentTrack }));
+    }
+  }, [currentTrack]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -193,14 +218,30 @@ export default function GlobalPlayer() {
   }, []);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+    if (audioRef.current && currentTrack) {
+      const time = audioRef.current.currentTime;
+      setCurrentTime(time);
+      window.dispatchEvent(new CustomEvent('global-audio-progress', {
+        detail: {
+          src: currentTrack.src,
+          currentTime: time,
+          duration: audioRef.current.duration || duration,
+        },
+      }));
     }
   };
 
   const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
+    if (audioRef.current && currentTrack) {
+      const trackDuration = audioRef.current.duration;
+      setDuration(trackDuration);
+      window.dispatchEvent(new CustomEvent('global-audio-progress', {
+        detail: {
+          src: currentTrack.src,
+          currentTime: audioRef.current.currentTime,
+          duration: trackDuration,
+        },
+      }));
     }
   };
 
@@ -304,13 +345,13 @@ export default function GlobalPlayer() {
 
             <div className="player-center-row flex-1 px-4 flex flex-col items-center gap-2">
               <div className="flex items-center gap-4 shrink-0 mb-0.5">
-                <button onClick={() => setIsShuffle(!isShuffle)} className={`player-ctrl-btn text-sm ${isShuffle ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiShuffle /></button>
-                <button onClick={handlePrevious} className="player-ctrl-btn text-base"><FiSkipBack /></button>
-                <button onClick={() => setIsPlaying(!isPlaying)} className="player-ctrl-btn text-xl text-white hover:text-[#38bdf8] hover:scale-110 active:scale-95 transition-all mx-2">
+                <button onClick={() => setIsShuffle(!isShuffle)} title={isShuffle ? "Shuffle on" : "Shuffle off"} className={`player-ctrl-btn text-sm ${isShuffle ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiShuffle /></button>
+                <button onClick={handlePrevious} title="Previous track" className="player-ctrl-btn text-base"><FiSkipBack /></button>
+                <button onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? "Pause" : "Play"} className="player-ctrl-btn text-xl text-white hover:text-[#38bdf8] hover:scale-110 active:scale-95 transition-all mx-2">
                   {isPlaying ? <FiPause className="fill-white hover:fill-[#38bdf8] transition-colors" /> : <FiPlay className="translate-x-[1px] fill-white hover:fill-[#38bdf8] transition-colors" />}
                 </button>
-                <button onClick={handleNext} className="player-ctrl-btn text-base"><FiSkipForward /></button>
-                <button onClick={() => setIsRepeat(!isRepeat)} className={`player-ctrl-btn text-sm ${isRepeat ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiRepeat /></button>
+                <button onClick={handleNext} title="Next track" className="player-ctrl-btn text-base"><FiSkipForward /></button>
+                <button onClick={() => setIsRepeat(!isRepeat)} title={isRepeat ? "Repeat on" : "Repeat off"} className={`player-ctrl-btn text-sm ${isRepeat ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiRepeat /></button>
               </div>
               
               <div className="w-full flex items-center px-1 sm:px-2" style={{ width: '100%', maxWidth: '100%' }}>
@@ -333,7 +374,7 @@ export default function GlobalPlayer() {
 
             <div className="player-right-controls flex items-center gap-3 relative w-[26%] justify-start shrink-0 ml-0 mt-2 pr-0">
               <div className="flex items-center gap-2 rounded-full bg-[rgba(56,189,248,0.08)] backdrop-blur-md px-2.5 py-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.25)] mr-2 translate-x-[-10px] translate-y-[6px]">
-                <button onClick={toggleMute} className="player-ctrl-btn text-sm hover:text-white">
+                <button onClick={toggleMute} title={volume === 0 ? "Unmute" : "Mute"} className="player-ctrl-btn text-sm hover:text-white">
                   {volume === 0 ? <FiVolumeX /> : volume < 0.5 ? <FiVolume1 /> : <FiVolume2 />}
                 </button>
                 <input type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-[rgba(147,197,253,0.25)] accent-[#38bdf8]"/>
@@ -341,7 +382,7 @@ export default function GlobalPlayer() {
 
               {/* NEW: Added Minimize Button to the control strip */}
               <div className="flex items-center gap-1.5 border-l border-white/10 pl-3 h-6 translate-y-[2px]">
-                <button onClick={() => setIsListOpen(!isListOpen)} className={`player-ctrl-btn text-sm transition-colors ${isListOpen ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : 'hover:text-white'}`}><FiList /></button>
+                <button onClick={() => setIsListOpen(!isListOpen)} title={isListOpen ? "Close queue" : "Open queue"} className={`player-ctrl-btn text-sm transition-colors ${isListOpen ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : 'hover:text-white'}`}><FiList /></button>
                 <button onClick={handleMinimize} title="Minimize Player" className="player-ctrl-btn text-sm text-zinc-400 hover:text-[#38bdf8] transition-colors ml-1"><FiMinimize2 /></button>
               </div>
 
@@ -429,6 +470,7 @@ export default function GlobalPlayer() {
               <button 
                 onPointerDown={(e) => e.stopPropagation()} 
                 onClick={() => setIsPlaying(!isPlaying)} 
+                title={isPlaying ? "Pause" : "Play"}
                 className="player-ctrl-btn text-lg text-white hover:text-[#38bdf8] hover:scale-110 active:scale-95 transition-all"
               >
                 {isPlaying ? <FiPause className="fill-white hover:fill-[#38bdf8] transition-colors" /> : <FiPlay className="translate-x-[1px] fill-white hover:fill-[#38bdf8] transition-colors" />}

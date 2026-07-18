@@ -3,8 +3,10 @@
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import Navbar from "@/components/Navbar";
+import SyncedAlbumTrackPlayer from "@/components/SyncedAlbumTrackPlayer";
 import { client } from '@/sanity/lib/client';
 import { motion } from 'framer-motion';
+import { playGlobalTrack, toggleGlobalAudio } from '@/lib/globalAudio';
 
 interface Track {
   trackNumber: string;
@@ -16,18 +18,56 @@ interface Track {
 interface AlbumDetail {
   title: string;
   subtitle: string;
-  topic: string;
+  time?: string | Date;
   description: string;
   image: string;
   projectLink: string;
   tracks: Track[];
 }
 
+const formatReleaseDate = (dateValue: string | Date) => {
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
 export default function AlbumDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
 
   const [album, setAlbum] = useState<AlbumDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeSrc, setActiveSrc] = useState<string | null>(null);
+  const [isGlobalPlaying, setIsGlobalPlaying] = useState(false);
+  const [playback, setPlayback] = useState({ currentTime: 0, duration: 0 });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).isGlobalAudioPlaying) {
+      setIsGlobalPlaying(true);
+    }
+
+    const handleTrack = (e: Event) => {
+      const track = (e as CustomEvent<{ src: string }>).detail;
+      setActiveSrc(track?.src ?? null);
+    };
+    const handleState = (e: Event) => {
+      setIsGlobalPlaying((e as CustomEvent<boolean>).detail);
+    };
+    const handleProgress = (e: Event) => {
+      const detail = (e as CustomEvent<{ src: string; currentTime: number; duration: number }>).detail;
+      setActiveSrc(detail.src);
+      setPlayback({ currentTime: detail.currentTime, duration: detail.duration });
+    };
+
+    window.addEventListener('global-audio-track', handleTrack);
+    window.addEventListener('global-audio-state', handleState);
+    window.addEventListener('global-audio-progress', handleProgress);
+
+    return () => {
+      window.removeEventListener('global-audio-track', handleTrack);
+      window.removeEventListener('global-audio-state', handleState);
+      window.removeEventListener('global-audio-progress', handleProgress);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchAlbumDetails = async () => {
@@ -36,7 +76,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
           *[_type == "album" && slug.current == $slug][0] {
             title,
             subtitle,
-            topic,
+            time,
             description,
             "image": image.asset->url,
             projectLink,
@@ -62,9 +102,26 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
     }
   }, [slug]);
 
+  const handleTrackPlayToggle = (track: Track) => {
+    if (!track.mediaUrl || !album) return;
+
+    if (activeSrc === track.mediaUrl) {
+      toggleGlobalAudio();
+      return;
+    }
+
+    playGlobalTrack({
+      src: track.mediaUrl,
+      title: track.name,
+      artist: track.albumArtist || album.subtitle || "Unknown Artist",
+      album: album.title,
+      image: album.image,
+    });
+  };
+
   if (isLoading) {
     return (
-      <div className="content-wrapper min-h-screen bg-[#030712]">
+      <div className="content-wrapper min-h-screen bg-transparent">
         <Navbar />
         <div className="flex items-center justify-center min-h-[70vh]">
           <p className="text-white/50 font-mono text-sm animate-pulse">Decrypting portfolio files...</p>
@@ -75,7 +132,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
 
   if (!album) {
     return (
-      <div className="content-wrapper min-h-screen bg-[#030712]">
+      <div className="content-wrapper min-h-screen bg-transparent">
         <Navbar />
         <div className="flex flex-col items-center justify-center min-h-[70vh]">
           <h1 className="text-2xl text-white font-serif mb-4">Record Not Found</h1>
@@ -86,7 +143,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] relative flex flex-col justify-between" style={{ overflowX: 'hidden' }}>
+    <div className="min-h-screen bg-transparent relative flex flex-col justify-between" style={{ overflowX: 'hidden' }}>
       <Navbar />
       
       {/* FIXED: Changed alignment to 'justify-center' and set minHeight to push it to the exact vertical middle */}
@@ -181,7 +238,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                 </span>
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
                 <p style={{ margin: 0, color: '#ffffff', fontSize: '14px', fontFamily: 'sans-serif' }}>
-                  {album.topic || "Standard Edition Asset"}
+                  {album.time ? formatReleaseDate(album.time) : "—"}
                 </p>
               </div>
 
@@ -218,7 +275,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                       cursor: 'pointer'
                     }}
                   >
-                    Stream Project Material <span style={{ marginLeft: '8px' }}>↗</span>
+                    Stream My Album <span style={{ marginLeft: '8px' }}>↗</span>
                   </a>
                 </div>
               )}
@@ -235,15 +292,19 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                    </p>
                 ) : (
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                     {album.tracks.map((track, i) => (
+                     {album.tracks.map((track, i) => {
+                       const isAudio = track.mediaUrl && !track.mediaUrl.match(/\.(mp4|webm|mov)$/i);
+                       const isActive = isAudio && activeSrc === track.mediaUrl;
+
+                       return (
                        <div 
                          key={i} 
                          style={{ 
                            display: 'flex', 
                            flexDirection: 'column',
                            padding: '12px 16px', 
-                           background: 'rgba(255,255,255,0.02)', 
-                           border: '1px solid rgba(255,255,255,0.05)', 
+                           background: isActive ? 'rgba(56,189,248,0.06)' : 'rgba(255,255,255,0.02)', 
+                           border: isActive ? '1px solid rgba(56,189,248,0.25)' : '1px solid rgba(255,255,255,0.05)', 
                            borderRadius: '6px' 
                          }}
                        >
@@ -263,7 +324,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
 
                           {/* FIXED: Dynamic Media Rendering (Audio vs Video) based on uploaded file extension */}
                           {track.mediaUrl && (
-                            <div style={{ marginTop: '12px', width: '100%' }}>
+                            <div style={{ marginTop: isAudio ? 0 : '12px', width: '100%' }}>
                               {track.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
                                 <video 
                                   controls 
@@ -271,16 +332,19 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                                   style={{ width: '100%', maxHeight: '250px', borderRadius: '4px', backgroundColor: '#000', outline: 'none' }} 
                                 />
                               ) : (
-                                <audio 
-                                  controls 
-                                  src={track.mediaUrl} 
-                                  style={{ width: '100%', height: '36px', outline: 'none' }} 
+                                <SyncedAlbumTrackPlayer
+                                  isActive={!!isActive}
+                                  isPlaying={!!isActive && isGlobalPlaying}
+                                  currentTime={isActive ? playback.currentTime : 0}
+                                  duration={isActive ? playback.duration : 0}
+                                  onPlayToggle={() => handleTrackPlayToggle(track)}
                                 />
                               )}
                             </div>
                           )}
                        </div>
-                     ))}
+                     );
+                     })}
                    </div>
                 )}
               </div>

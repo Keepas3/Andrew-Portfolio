@@ -79,7 +79,7 @@ export default defineType({
             defineField({ 
               name: 'trackNumber', 
               type: 'string', 
-              title: 'Track Number (e.g., 01)' 
+              title: 'Track Number (e.g., 1)' 
             }),
             defineField({ 
               name: 'name', 
@@ -89,7 +89,7 @@ export default defineType({
             defineField({ 
               name: 'albumArtist', 
               type: 'string', 
-              title: 'Song Artist (probably just you)' 
+              title: 'Song Artist' 
             }),
             defineField({
               name: 'mediaFile',

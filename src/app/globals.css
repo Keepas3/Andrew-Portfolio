@@ -38,6 +38,31 @@
         opacity: 0.15;
     }
 
+    #global-audio-ambient-canvas {
+        position: fixed;
+        top: var(--ambient-zone-top, 72px);
+        left: 0;
+        right: 0;
+        bottom: var(--ambient-zone-bottom, 104px);
+        width: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.24;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #global-audio-ambient-canvas {
+            opacity: 0.14;
+        }
+    }
+
+    @media (max-width: 768px) {
+        #global-audio-ambient-canvas {
+            top: var(--ambient-zone-top, 64px);
+            bottom: var(--ambient-zone-bottom, 120px);
+        }
+    }
+
     /* --- Navigation Bar --- */
     .navbar {
         position: fixed;
