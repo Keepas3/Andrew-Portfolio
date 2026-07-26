@@ -7,7 +7,7 @@ import {
   FiShuffle, FiRepeat, FiList, FiSkipBack, 
   FiSkipForward, FiPlay, FiPause, 
   FiVolume2, FiVolume1, FiVolumeX,
-  FiMinimize2, FiMaximize2 // NEW: Minimize and Maximize Icons
+  FiMinimize2, FiMaximize2 
 } from "react-icons/fi";
 import { client } from '@/sanity/lib/client';
 import type { GlobalTrack } from '@/lib/globalAudio';
@@ -33,11 +33,9 @@ export default function GlobalPlayer() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
 
-  // --- NEW: Minimization & Drag State ---
   const [isMinimized, setIsMinimized] = useState(false);
   const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
-  // Dynamically calculate drag bounds based on screen size so it can't be dragged off-screen
   useEffect(() => {
     const updateConstraints = () => {
       setDragConstraints({
@@ -56,7 +54,7 @@ export default function GlobalPlayer() {
   }, []);
 
   const handleMinimize = () => {
-    setIsListOpen(false); // Close queue if open
+    setIsListOpen(false); 
     setIsMinimized(true);
   };
 
@@ -94,6 +92,7 @@ export default function GlobalPlayer() {
               name,
               duration,
               albumArtist,
+              "trackImageUrl": trackImage.asset->url,
               "mediaUrl": mediaFile.asset->url
             }
           }
@@ -110,7 +109,7 @@ export default function GlobalPlayer() {
                   artist: track.albumArtist || album.subtitle || "Unknown Artist", 
                   album: album.albumTitle || "Unknown Album",
                   durationString: track.duration,
-                  image: album.image,
+                  image: track.trackImageUrl || album.image, 
                   src: track.mediaUrl
                 });
               }
@@ -295,9 +294,6 @@ export default function GlobalPlayer() {
 
   return (
     <>
-      {/* CRITICAL: The audio tag remains completely outside the animations. 
-        This guarantees the music never cuts out while transitioning UI states. 
-      */}
       <audio 
         ref={audioRef}
         src={currentTrack.src}
@@ -307,9 +303,6 @@ export default function GlobalPlayer() {
         onEnded={handleNext}
       />
 
-      {/* =========================================================
-                             FULL PLAYER UI 
-      ========================================================= */}
       <AnimatePresence>
         {!isMinimized && (
           <motion.div 
@@ -380,7 +373,6 @@ export default function GlobalPlayer() {
                 <input type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-[rgba(147,197,253,0.25)] accent-[#38bdf8]"/>
               </div>
 
-              {/* NEW: Added Minimize Button to the control strip */}
               <div className="flex items-center gap-1.5 border-l border-white/10 pl-3 h-6 translate-y-[2px]">
                 <button onClick={() => setIsListOpen(!isListOpen)} title={isListOpen ? "Close queue" : "Open queue"} className={`player-ctrl-btn text-sm transition-colors ${isListOpen ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : 'hover:text-white'}`}><FiList /></button>
                 <button onClick={handleMinimize} title="Minimize Player" className="player-ctrl-btn text-sm text-zinc-400 hover:text-[#38bdf8] transition-colors ml-1"><FiMinimize2 /></button>
@@ -391,28 +383,58 @@ export default function GlobalPlayer() {
                 {isListOpen && (
                   <motion.div 
                     ref={popupRef} 
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} transition={{ duration: 0.2, ease: "easeOut" }} 
-                    className="queue-popup absolute bottom-full mb-6 right-0 w-80 h-[380px] flex flex-col bg-[#050505]/95 border border-white/10 rounded-2xl p-3 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-[999999] backdrop-blur-xl"
+                    initial={{ opacity: 0, y: 15, scale: 0.95 }} 
+                    animate={{ opacity: 1, y: 0, scale: 1 }} 
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }} 
+                    transition={{ duration: 0.2, ease: "easeOut" }} 
+                    className="queue-popup absolute bottom-full mb-6 right-0 w-[340px] h-[400px] flex flex-col bg-[#121212]/95 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[999999] backdrop-blur-2xl text-[#38bdf8] font-bold"
                   >
-                    <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/5 shrink-0 px-2">
-                      <p className="text-[10px] font-mono tracking-[0.2em] text-[#38bdf8] uppercase font-bold">Queue Directory</p>
-                      <span className="text-[10px] font-mono text-zinc-500">{playlist.length} Tracks</span>
+                    {/* Header */}
+                    <div className="flex items-center justify-between pb-3 mb-2 shrink-0 px-2">
+                      <h3 className="text-[14px] font-bold text-white tracking-wide m-0">Song Queue</h3>
+                      <span className="text-[12px] font-medium text-[#a7a7a7]">{playlist.length} Tracks</span>
                     </div>
 
-                    <div className="flex flex-col gap-1.5 h-full overflow-y-auto overflow-x-hidden overscroll-contain pr-1.5 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20 transition-colors">
+                    {/* Track List */}
+                    <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden overscroll-contain pr-1 [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-full transition-all">
                       {playlist.map((track, index) => {
                         const isActive = currentTrack.title === track.title;
                         return (
-                          <button key={index} onClick={() => { setTrackIndex(index); setIsPlaying(true); setIsListOpen(false); }} className={`w-full text-left p-2 rounded-xl flex items-center gap-3 transition-all duration-200 group ${isActive ? 'bg-[#38bdf8]/10 border border-[#38bdf8]/20 shadow-[inset_0_0_15px_rgba(56,189,248,0.05)]' : 'bg-transparent border border-transparent hover:bg-white/5'}`}>
-                            <div style={{ width: '36px', height: '36px', minWidth: '36px' }} className="bg-black rounded-full shrink-0 overflow-hidden flex items-center justify-center p-0 m-0 border-0 shadow-sm relative">
-                              {track.image && <img src={track.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} className={`rounded-full block transition-transform duration-500 ${isActive && isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
-                              {isActive && <div className="absolute w-2 h-2 bg-black rounded-full border border-zinc-800" />}
+                          <div 
+                            key={index} 
+                            onClick={() => { setTrackIndex(index); setIsPlaying(true); setIsListOpen(false); }} 
+                            className={`w-full text-left p-2 rounded-md flex items-center transition-colors duration-150 cursor-pointer select-none ${isActive ? 'bg-[rgba(255,255,255,0.1)]' : 'bg-transparent hover:bg-[rgba(255,255,255,0.05)]'}`}
+                          >
+                            {/* Track Image */}
+                            <div style={{ width: '40px', height: '40px', minWidth: '40px' }} className="bg-[#282828] rounded shrink-0 overflow-hidden flex items-center justify-center relative shadow-sm mr-3">
+                              {track.image && (
+                                <img 
+                                  src={track.image} 
+                                  alt="" 
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                  className="block" 
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+                                />
+                              )}
+                              
+                              {/* Overlay indicator for active playing track */}
+                              {isActive && (
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                  <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-pulse' : 'bg-[#38bdf8]'}`} />
+                                </div>
+                              )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className={`text-[13px] font-bold truncate m-0 ${isActive ? 'text-[#38bdf8]' : 'text-zinc-200 group-hover:text-white'}`}>{track.title}</p>
-                              <p className={`text-[10px] font-mono truncate m-0 font-normal mt-0.5 ${isActive ? 'text-[#38bdf8]/70' : 'text-zinc-500'}`}>{track.artist} <span className="opacity-50 mx-1">•</span> {track.album}</p>
+                            
+                            <div className="min-w-0 flex-1 flex flex-col justify-center">
+                              {/* Clean typography */}
+                              <p className={`text-[14px] font-medium truncate m-0 leading-tight ${isActive ? 'text-[#38bdf8]' : 'text-white'}`}>
+                                {track.title}
+                              </p>
+                              <p className="text-[12px] truncate m-0 mt-1 text-[#a7a7a7] leading-tight">
+                                {track.artist}
+                              </p>
                             </div>
-                          </button>
+                          </div>
                         )
                       })}
                     </div>
@@ -439,7 +461,6 @@ export default function GlobalPlayer() {
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999999 }}
-            // FIXED: Added blue border, subtle blue glow, and cleaned up the typo
             className="bg-[#050505]/95 backdrop-blur-xl border border-[#38bdf8]/50 p-2 pr-4 rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.8),0_0_15px_rgba(56,189,248,0.15)] flex items-center gap-3 cursor-grab active:cursor-grabbing hover:border-[#38bdf8]/80 transition-colors duration-300 max-w-[280px]"
           >
             <div 
@@ -456,7 +477,6 @@ export default function GlobalPlayer() {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#050505] rounded-full border border-zinc-800" />
             </div>
 
-            {/* FIXED: Added max-w-[130px] to strictly enforce truncation so it never stretches the pill */}
             <div className="flex flex-col min-w-0 flex-1 pointer-events-none mr-2 max-w-[130px]">
               <p className="text-white text-[12px] font-bold truncate m-0 leading-tight block w-full">
                 {currentTrack.title}

@@ -12,6 +12,7 @@ interface Track {
   trackNumber: string;
   name: string;
   albumArtist: string;
+  trackImageUrl?: string; // NEW: Added track image type
   mediaUrl?: string;
 }
 
@@ -84,6 +85,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
               trackNumber,
               name,
               albumArtist,
+              "trackImageUrl": trackImage.asset->url, // NEW: Fetch the individual track image
               "mediaUrl": mediaFile.asset->url
             }
           }
@@ -115,7 +117,7 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
       title: track.name,
       artist: track.albumArtist || album.subtitle || "Unknown Artist",
       album: album.title,
-      image: album.image,
+      image: track.trackImageUrl || album.image, // NEW: Pass the track image to the global player, fallback to album cover
     });
   };
 
@@ -146,7 +148,6 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
     <div className="min-h-screen bg-transparent relative flex flex-col justify-between" style={{ overflowX: 'hidden' }}>
       <Navbar />
       
-      {/* FIXED: Changed alignment to 'justify-center' and set minHeight to push it to the exact vertical middle */}
       <main 
         className="w-full mx-auto px-6 md:px-12 flex-1 flex flex-col items-center justify-center"
         style={{ minHeight: 'calc(100vh - 80px)', paddingTop: '100px', paddingBottom: '60px' }}
@@ -313,6 +314,18 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                               <span style={{ color: '#71717a', fontSize: '12px', fontFamily: 'monospace' }}>
                                 {track.trackNumber || String(i + 1).padStart(2, '0')}
                               </span>
+                              
+                              {/* NEW: Display track thumbnail if uploaded */}
+                              {track.trackImageUrl && (
+                                <div style={{ width: '32px', height: '32px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                                  <img 
+                                    src={track.trackImageUrl} 
+                                    alt={track.name} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                  />
+                                </div>
+                              )}
+                              
                               <span style={{ color: '#e4e4e7', fontSize: '14px', fontWeight: 500, fontFamily: 'sans-serif' }}>
                                 {track.name}
                               </span>
@@ -322,7 +335,6 @@ export default function AlbumDetailPage({ params }: { params: Promise<{ slug: st
                             </span>
                           </div>
 
-                          {/* FIXED: Dynamic Media Rendering (Audio vs Video) based on uploaded file extension */}
                           {track.mediaUrl && (
                             <div style={{ marginTop: isAudio ? 0 : '12px', width: '100%' }}>
                               {track.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (

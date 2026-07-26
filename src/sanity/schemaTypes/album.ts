@@ -27,7 +27,7 @@ export default defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
-    /* --- NEW STATUS FIELD --- */
+    
     defineField({
       name: 'status',
       type: 'string',
@@ -46,8 +46,8 @@ export default defineType({
     defineField({
       name: 'image',
       type: 'image',
-      title: 'Square Album Jacket Art (Optional)',
-      description: 'Leave empty to use a default placeholder.',
+      title: 'Square Album Art (Optional)',
+      description: 'Leaving this empty will use a black box as a default placeholder.',
       options: { hotspot: true }
     }),
     defineField({
@@ -63,7 +63,7 @@ export default defineType({
     defineField({
       name: 'projectLink',
       type: 'url',
-      title: 'Link to Album or video etc. (Optional)',
+      title: 'Link to Album or playlist etc. (Optional)',
     }),
     defineField({
       name: 'tracks',
@@ -90,6 +90,13 @@ export default defineType({
               name: 'albumArtist', 
               type: 'string', 
               title: 'Song Artist' 
+            }),
+            defineField({
+              name: 'trackImage',
+              type: 'image',
+              title: 'Track Cover Art (Optional)',
+              description: 'Upload artwork specific to this track.',
+              options: { hotspot: true } 
             }),
             defineField({
               name: 'mediaFile',
