@@ -136,7 +136,7 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
                 position: 'relative',
                 aspectRatio: '1 / 1',
                 backgroundColor: '#0a0708',
-                boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.8), 0 0 calc(6px + var(--audio-bass, 0) * 20px) rgba(56, 189, 248, calc(var(--audio-bass, 0) * 0.3))',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '4px',
                 overflow: 'hidden'
@@ -182,7 +182,7 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
                 <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: '#71717a', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
                   / Release Designation
                 </span>
-                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
+                <div className="detail-divider-line" style={{ margin: '8px 0' }} />
                 <p style={{ margin: 0, color: '#ffffff', fontSize: '14px', fontFamily: 'sans-serif' }}>
                   {album.time ? formatReleaseDate(album.time) : "—"}
                 </p>
@@ -192,7 +192,7 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
                 <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: '#71717a', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
                   / Description
                 </span>
-                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
+                <div className="detail-divider-line" style={{ margin: '8px 0' }} />
                 <p style={{ margin: 0, color: '#d4d4d8', fontSize: '15px', lineHeight: 1.6, whiteSpace: 'pre-wrap', fontFamily: 'sans-serif' }}>
                   {album.description || "No description provided."}
                 </p>
@@ -230,7 +230,7 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
                 <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: '#71717a', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
                   / Tracklist Architecture
                 </span>
-                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0 16px 0' }} />
+                <div className="detail-divider-line" style={{ margin: '8px 0 16px 0' }} />
 
                 {(!album.tracks || album.tracks.length === 0) ? (
                   <p style={{ color: '#71717a', fontSize: '14px', fontStyle: 'italic', margin: 0 }}>

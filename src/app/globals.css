@@ -38,31 +38,6 @@
         opacity: 0.15;
     }
 
-    #global-audio-ambient-canvas {
-        position: fixed;
-        top: var(--ambient-zone-top, 72px);
-        left: 0;
-        right: 0;
-        bottom: var(--ambient-zone-bottom, 104px);
-        width: 100%;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0.24;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        #global-audio-ambient-canvas {
-            opacity: 0.14;
-        }
-    }
-
-    @media (max-width: 768px) {
-        #global-audio-ambient-canvas {
-            top: var(--ambient-zone-top, 64px);
-            bottom: var(--ambient-zone-bottom, 120px);
-        }
-    }
-
     /* --- Navigation Bar --- */
     .navbar {
         position: fixed;
@@ -79,6 +54,7 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        box-shadow: 0 1px calc(8px + var(--audio-high, 0) * 26px) rgba(56, 189, 248, calc(0.08 + var(--audio-bass, 0) * 0.6));
         transition: all 0.3s ease;
     }
 
@@ -140,6 +116,7 @@
         flex-direction: column;
         gap: 0.5rem;
         backdrop-filter: blur(5px);
+        box-shadow: 0 0 calc(8px + var(--audio-mid, 0) * 32px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.45));
     }
 
     .status-box h3 {
@@ -152,6 +129,13 @@
         border: none;
         border-top: 1px solid rgba(255, 255, 255, 0.05);
         margin-bottom: 0.5rem;
+        box-shadow: 0 1px calc(4px + var(--audio-high, 0) * 16px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.75));
+    }
+
+    .detail-divider-line {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 1px calc(4px + var(--audio-high, 0) * 16px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.75));
     }
 
     .status-text {
@@ -168,6 +152,7 @@
         background-color: rgba(255, 255, 255, 0.01);
         transition: all 0.2s ease-in-out;
         text-decoration: none;
+        box-shadow: 0 0 calc(5px + var(--audio-mid, 0) * 26px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.4));
     }
 
     .category-card-item:hover {
@@ -191,6 +176,7 @@
         border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.05);
         transition: background 0.2s ease;
+        box-shadow: 0 0 calc(4px + var(--audio-high, 0) * 20px) rgba(242, 110, 140, calc(var(--audio-high, 0) * 0.38));
     }
 
     .game-item:hover {
@@ -206,6 +192,10 @@
     /* ==========================================================================
        WORK / PROJECTS / ALBUMS SECTION (COMPACT SELECTION GRID)
        ========================================================================== */
+    .album-card-frame {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 calc(4px + var(--audio-mid, 0) * 18px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.3));
+    }
+
     .projects-grid {
         display: grid;
         /* Bite-sized grid: naturally shrinks cards to 180px minimum */
@@ -223,6 +213,7 @@
         overflow: hidden;
         transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease;
         text-decoration: none !important;
+        box-shadow: 0 0 calc(5px + var(--audio-bass, 0) * 30px) rgba(56, 189, 248, calc(var(--audio-bass, 0) * 0.42));
     }
 
     /* Cyan Hover for Latest Releases */
@@ -304,14 +295,14 @@
        This prevents the box from infinitely expanding if the raw image file is massive. */
     .gallery-slide-window-dynamic {
         width: fit-content !important;
-        max-width: 85vw !important; 
+        max-width: 85vw !important;
         max-height: 75vh !important;
         height: auto;
         overflow: hidden;
         border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.1);
         background: #0d0d0d;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 calc(12px + var(--audio-bass, 0) * 38px) rgba(229, 114, 159, calc(var(--audio-bass, 0) * 0.55));
         transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
@@ -401,8 +392,9 @@
         margin-top: auto;
         position: relative;
         /* FIXED: Lowered z-index to 0 so it slides cleanly UNDER the z-999999 audio player */
-        z-index: 0; 
+        z-index: 0;
         padding: 2rem !important; /* Normal, compact footer sizing */
+        box-shadow: 0 -1px calc(5px + var(--audio-mid, 0) * 20px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.38));
     }
 
     /* Target the container you built inside Footer.tsx */
@@ -472,7 +464,7 @@
         border-radius: 24px;
         padding: 2.5rem;
         margin-bottom: 2rem;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 calc(10px + var(--audio-bass, 0) * 34px) rgba(56, 189, 248, calc(var(--audio-bass, 0) * 0.45));
     }
 
     .profile-title-row {
@@ -489,7 +481,7 @@
         border-radius: 50%;
         overflow: hidden;
         border: 3px solid #38bdf8; /* Sharp neon-cyan trim border */
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+        box-shadow: 0 0 calc(16px + var(--audio-bass, 0) * 46px) rgba(56, 189, 248, calc(0.22 + var(--audio-bass, 0) * 0.55));
         background: #030712;
         shrink-0: 1;
     }
@@ -565,9 +557,9 @@
    ========================================================================== */
 .master-global-player {
         position: fixed !important;
-        bottom: 24px !important; 
+        bottom: 24px !important;
         left: 50% !important;
-        transform: translateX(-50%) !important; 
+        transform: translateX(-50%) !important;
         width: 90% !important;
         max-width: 900px !important; /* Fixed invalid max-width property */
         height: 70px !important;
@@ -579,10 +571,11 @@
         -webkit-backdrop-filter: blur(16px) !important;
         
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 999px !important; 
+        border-radius: 999px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
+        box-shadow: 0 0 calc(22px + var(--audio-bass, 0) * 46px) rgba(56, 189, 248, calc(0.12 + var(--audio-bass, 0) * 0.5)) !important;
     }
 
 /* --- TEXT AND TRACK INFO ALIGNMENT RESETS --- */

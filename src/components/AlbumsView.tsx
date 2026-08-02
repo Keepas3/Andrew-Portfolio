@@ -61,7 +61,7 @@ export default function AlbumsView({ albums }: AlbumsViewProps) {
                   {/* --- IMAGE CONTAINER --- */}
                   {/* FIXED: Removed all borders to kill the purple outline glitch */}
                   <div
-                    className="w-full aspect-square bg-[#0a0708] overflow-hidden relative shadow-lg mb-3 rounded-sm"
+                    className="album-card-frame w-full aspect-square bg-[#0a0708] overflow-hidden relative mb-3 rounded-sm"
                     style={{ border: 'none', outline: 'none' }}
                   >
                     {album.image ? (

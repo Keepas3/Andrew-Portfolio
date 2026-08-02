@@ -96,7 +96,7 @@ export default defineType({
               type: 'image',
               title: 'Track Cover Art (Optional)',
               description: 'Upload artwork specific to this track.',
-              options: { hotspot: true } 
+              options: { hotspot: true }
             }),
             defineField({
               name: 'mediaFile',

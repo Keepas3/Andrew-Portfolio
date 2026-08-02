@@ -107,10 +107,10 @@ export default function GlobalPlayer() {
               if (track.mediaUrl) { 
                 masterList.push({
                   title: track.name,
-                  artist: track.albumArtist || album.subtitle || "Unknown Artist", 
+                  artist: track.albumArtist || album.subtitle || "Unknown Artist",
                   album: album.albumTitle || "Unknown Album",
                   durationString: track.duration,
-                  image: track.trackImageUrl || album.image, 
+                  image: track.trackImageUrl || album.image,
                   src: track.mediaUrl
                 });
               }

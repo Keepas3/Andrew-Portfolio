@@ -203,7 +203,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                         borderRadius: '16px',
                         overflow: 'hidden',
                         backgroundColor: 'black',
-                        boxShadow: isFront ? '0 25px 60px rgba(229,114,159,0.3)' : '0 15px 50px rgba(0,0,0,0.9)',
+                        boxShadow: `${isFront ? '0 25px 60px rgba(229,114,159,0.3)' : '0 15px 50px rgba(0,0,0,0.9)'}, 0 0 calc(6px + var(--audio-mid, 0) * 18px) rgba(229, 114, 159, calc(var(--audio-mid, 0) * 0.3))`,
                         transform: isFront ? 'scale(1.02)' : 'scale(1)',
                         transition: 'all 0.5s ease-out'
                       }}>
