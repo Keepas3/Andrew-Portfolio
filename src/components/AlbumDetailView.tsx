@@ -1,0 +1,318 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import Navbar from "@/components/Navbar";
+import SyncedAlbumTrackPlayer from "@/components/SyncedAlbumTrackPlayer";
+import { motion } from 'framer-motion';
+import { playGlobalTrack, toggleGlobalAudio } from '@/lib/globalAudio';
+
+export interface Track {
+  trackNumber: string;
+  name: string;
+  albumArtist: string;
+  trackImageUrl?: string;
+  mediaUrl?: string;
+}
+
+export interface AlbumDetail {
+  title: string;
+  subtitle: string;
+  time?: string | Date;
+  description: string;
+  image: string;
+  projectLink: string;
+  tracks: Track[];
+}
+
+const formatReleaseDate = (dateValue: string | Date) => {
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+interface AlbumDetailViewProps {
+  album: AlbumDetail;
+}
+
+export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
+  const [activeSrc, setActiveSrc] = useState<string | null>(null);
+  const [isGlobalPlaying, setIsGlobalPlaying] = useState(false);
+  const [playback, setPlayback] = useState({ currentTime: 0, duration: 0 });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).isGlobalAudioPlaying) {
+      setIsGlobalPlaying(true);
+    }
+
+    const handleTrack = (e: Event) => {
+      const track = (e as CustomEvent<{ src: string }>).detail;
+      setActiveSrc(track?.src ?? null);
+    };
+    const handleState = (e: Event) => {
+      setIsGlobalPlaying((e as CustomEvent<boolean>).detail);
+    };
+    const handleProgress = (e: Event) => {
+      const detail = (e as CustomEvent<{ src: string; currentTime: number; duration: number }>).detail;
+      setActiveSrc(detail.src);
+      setPlayback({ currentTime: detail.currentTime, duration: detail.duration });
+    };
+
+    window.addEventListener('global-audio-track', handleTrack);
+    window.addEventListener('global-audio-state', handleState);
+    window.addEventListener('global-audio-progress', handleProgress);
+
+    return () => {
+      window.removeEventListener('global-audio-track', handleTrack);
+      window.removeEventListener('global-audio-state', handleState);
+      window.removeEventListener('global-audio-progress', handleProgress);
+    };
+  }, []);
+
+  const handleTrackPlayToggle = (track: Track) => {
+    if (!track.mediaUrl) return;
+
+    if (activeSrc === track.mediaUrl) {
+      toggleGlobalAudio();
+      return;
+    }
+
+    playGlobalTrack({
+      src: track.mediaUrl,
+      title: track.name,
+      artist: track.albumArtist || album.subtitle || "Unknown Artist",
+      album: album.title,
+      image: track.trackImageUrl || album.image,
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-transparent relative flex flex-col justify-between" style={{ overflowX: 'hidden' }}>
+      <Navbar />
+
+      <main
+        className="w-full mx-auto px-6 md:px-12 flex-1 flex flex-col items-center justify-center"
+        style={{ minHeight: 'calc(100vh - 80px)', paddingTop: '100px', paddingBottom: '60px' }}
+      >
+
+        <div className="w-full" style={{ maxWidth: '1100px' }}>
+
+          <div style={{ marginBottom: '2.5rem' }}>
+            <Link
+              href="/albums"
+              style={{
+                color: '#9ca3af',
+                textDecoration: 'none',
+                fontSize: '14px',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                fontWeight: 'bold',
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}
+            >
+              <span style={{ fontSize: '18px', marginRight: '8px', lineHeight: 1 }}>←</span> BACK TO ALBUMS
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '4rem',
+              justifyContent: 'center',
+              alignItems: 'flex-start'
+            }}
+          >
+
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                flex: '1 1 400px',
+                maxWidth: '480px',
+                position: 'relative',
+                aspectRatio: '1 / 1',
+                backgroundColor: '#0a0708',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '4px',
+                overflow: 'hidden'
+              }}
+            >
+              {album.image ? (
+                <Image
+                  src={album.image}
+                  alt={album.title}
+                  fill
+                  sizes="(max-width: 768px) 90vw, 480px"
+                  style={{ objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#52525b', fontFamily: 'monospace', fontSize: '14px' }}>
+                  NO COVER ART
+                </div>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              style={{
+                flex: '1 1 400px',
+                maxWidth: '550px',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              <h1 style={{ margin: 0, fontSize: '3rem', fontWeight: 'bold', color: '#ffffff', lineHeight: 1.1, fontFamily: 'sans-serif' }}>
+                {album.title}
+              </h1>
+
+              {album.subtitle && (
+                <p style={{ margin: '8px 0 0 0', color: '#a1a1aa', fontSize: '1.1rem', fontFamily: 'sans-serif' }}>
+                  {album.subtitle}
+                </p>
+              )}
+
+              <div style={{ marginTop: '2.5rem' }}>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: '#71717a', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
+                  / Release Designation
+                </span>
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
+                <p style={{ margin: 0, color: '#ffffff', fontSize: '14px', fontFamily: 'sans-serif' }}>
+                  {album.time ? formatReleaseDate(album.time) : "—"}
+                </p>
+              </div>
+
+              <div style={{ marginTop: '2rem' }}>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: '#71717a', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
+                  / Description
+                </span>
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
+                <p style={{ margin: 0, color: '#d4d4d8', fontSize: '15px', lineHeight: 1.6, whiteSpace: 'pre-wrap', fontFamily: 'sans-serif' }}>
+                  {album.description || "No description provided."}
+                </p>
+              </div>
+
+              {album.projectLink && (
+                <div style={{ marginTop: '2rem' }}>
+                  <a
+                    href={album.projectLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '14px 28px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '4px',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase',
+                      fontFamily: 'sans-serif',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Stream My Album <span style={{ marginLeft: '8px' }}>↗</span>
+                  </a>
+                </div>
+              )}
+
+              <div style={{ marginTop: '3.5rem' }}>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: '#71717a', fontWeight: 'bold', fontFamily: 'sans-serif' }}>
+                  / Tracklist Architecture
+                </span>
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0 16px 0' }} />
+
+                {(!album.tracks || album.tracks.length === 0) ? (
+                  <p style={{ color: '#71717a', fontSize: '14px', fontStyle: 'italic', margin: 0 }}>
+                    No tracks appended to this record yet.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {album.tracks.map((track, i) => {
+                      const isAudio = track.mediaUrl && !track.mediaUrl.match(/\.(mp4|webm|mov)$/i);
+                      const isActive = isAudio && activeSrc === track.mediaUrl;
+
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            padding: '12px 16px',
+                            background: isActive ? 'rgba(56,189,248,0.06)' : 'rgba(255,255,255,0.02)',
+                            border: isActive ? '1px solid rgba(56,189,248,0.25)' : '1px solid rgba(255,255,255,0.05)',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              <span style={{ color: '#71717a', fontSize: '12px', fontFamily: 'monospace' }}>
+                                {track.trackNumber || String(i + 1).padStart(2, '0')}
+                              </span>
+
+                              {/* NEW: Display track thumbnail if uploaded */}
+                              {track.trackImageUrl && (
+                                <div style={{ width: '32px', height: '32px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                                  <Image
+                                    src={track.trackImageUrl}
+                                    alt={track.name}
+                                    fill
+                                    sizes="32px"
+                                    style={{ objectFit: 'cover' }}
+                                  />
+                                </div>
+                              )}
+
+                              <span style={{ color: '#e4e4e7', fontSize: '14px', fontWeight: 500, fontFamily: 'sans-serif' }}>
+                                {track.name}
+                              </span>
+                            </div>
+                            <span style={{ color: '#a1a1aa', fontSize: '12px', fontFamily: 'monospace' }}>
+                              {track.albumArtist || "Unknown Artist"}
+                            </span>
+                          </div>
+
+                          {track.mediaUrl && (
+                            <div style={{ marginTop: isAudio ? 0 : '12px', width: '100%' }}>
+                              {track.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
+                                <video
+                                  controls
+                                  src={track.mediaUrl}
+                                  style={{ width: '100%', maxHeight: '250px', borderRadius: '4px', backgroundColor: '#000', outline: 'none' }}
+                                />
+                              ) : (
+                                <SyncedAlbumTrackPlayer
+                                  isActive={!!isActive}
+                                  isPlaying={!!isActive && isGlobalPlaying}
+                                  currentTime={isActive ? playback.currentTime : 0}
+                                  duration={isActive ? playback.duration : 0}
+                                  onPlayToggle={() => handleTrackPlayToggle(track)}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+            </motion.div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  );
+}

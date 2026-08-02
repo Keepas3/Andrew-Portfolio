@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { SiSpotify } from "react-icons/si";
 import { 
@@ -118,7 +119,11 @@ export default function GlobalPlayer() {
         });
 
         if (masterList.length > 0) {
-          const shuffled = [...masterList].sort(() => Math.random() - 0.5);
+          const shuffled = [...masterList];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
           setPlaylist(shuffled);
           setCurrentTrack(shuffled[0]);
         }
@@ -252,6 +257,24 @@ export default function GlobalPlayer() {
     audioRef.current.currentTime = percentage * duration;
   };
 
+  const handleSeekKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!audioRef.current || duration === 0) return;
+    const step = 5;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+      e.preventDefault();
+      audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + step);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+      e.preventDefault();
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - step);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      audioRef.current.currentTime = 0;
+    } else if (e.key === "End") {
+      e.preventDefault();
+      audioRef.current.currentTime = duration;
+    }
+  };
+
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVolume(Number(e.target.value));
   };
@@ -318,13 +341,15 @@ export default function GlobalPlayer() {
                 className="bg-black rounded-full overflow-hidden relative shrink-0 shadow-md p-0 border-0 m-0"
               >
                 {currentTrack.image && (
-                  <img 
+                  <Image
                     key={currentTrack.title}
-                    src={currentTrack.image} 
-                    alt="" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    className="rounded-full border-0 p-0 m-0 block" 
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+                    src={currentTrack.image}
+                    alt=""
+                    fill
+                    sizes="50px"
+                    style={{ objectFit: 'cover' }}
+                    className="rounded-full border-0 p-0 m-0 block"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 )}
               </div>
@@ -338,23 +363,31 @@ export default function GlobalPlayer() {
 
             <div className="player-center-row flex-1 px-4 flex flex-col items-center gap-2">
               <div className="flex items-center gap-4 shrink-0 mb-0.5">
-                <button onClick={() => setIsShuffle(!isShuffle)} title={isShuffle ? "Shuffle on" : "Shuffle off"} className={`player-ctrl-btn text-sm ${isShuffle ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiShuffle /></button>
-                <button onClick={handlePrevious} title="Previous track" className="player-ctrl-btn text-base"><FiSkipBack /></button>
-                <button onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? "Pause" : "Play"} className="player-ctrl-btn text-xl text-white hover:text-[#38bdf8] hover:scale-110 active:scale-95 transition-all mx-2">
+                <button onClick={() => setIsShuffle(!isShuffle)} title={isShuffle ? "Shuffle on" : "Shuffle off"} aria-label={isShuffle ? "Disable shuffle" : "Enable shuffle"} aria-pressed={isShuffle} className={`player-ctrl-btn text-sm ${isShuffle ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiShuffle /></button>
+                <button onClick={handlePrevious} title="Previous track" aria-label="Previous track" className="player-ctrl-btn text-base"><FiSkipBack /></button>
+                <button onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? "Pause" : "Play"} aria-label={isPlaying ? "Pause" : "Play"} className="player-ctrl-btn text-xl text-white hover:text-[#38bdf8] hover:scale-110 active:scale-95 transition-all mx-2">
                   {isPlaying ? <FiPause className="fill-white hover:fill-[#38bdf8] transition-colors" /> : <FiPlay className="translate-x-[1px] fill-white hover:fill-[#38bdf8] transition-colors" />}
                 </button>
-                <button onClick={handleNext} title="Next track" className="player-ctrl-btn text-base"><FiSkipForward /></button>
-                <button onClick={() => setIsRepeat(!isRepeat)} title={isRepeat ? "Repeat on" : "Repeat off"} className={`player-ctrl-btn text-sm ${isRepeat ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiRepeat /></button>
+                <button onClick={handleNext} title="Next track" aria-label="Next track" className="player-ctrl-btn text-base"><FiSkipForward /></button>
+                <button onClick={() => setIsRepeat(!isRepeat)} title={isRepeat ? "Repeat on" : "Repeat off"} aria-label={isRepeat ? "Disable repeat" : "Enable repeat"} aria-pressed={isRepeat} className={`player-ctrl-btn text-sm ${isRepeat ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : ''}`}><FiRepeat /></button>
               </div>
               
               <div className="w-full flex items-center px-1 sm:px-2" style={{ width: '100%', maxWidth: '100%' }}>
                 <span className="text-[10px] font-mono text-zinc-300 min-w-[44px] shrink-0 select-none text-right" style={{ marginRight: '16px' }}>
                   {formatTime(currentTime)}
                 </span>
-                <div 
-                  className="h-[5px] rounded-full relative cursor-pointer group/progress transition-all duration-200"
+                <div
+                  role="slider"
+                  tabIndex={0}
+                  aria-label="Seek"
+                  aria-valuemin={0}
+                  aria-valuemax={duration || 0}
+                  aria-valuenow={currentTime}
+                  aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+                  className="h-[5px] rounded-full relative cursor-pointer group/progress transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                   style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', margin: '0 2px', flex: '1 1 auto', width: '100%', minWidth: '300px' }}
                   onClick={handleSeek}
+                  onKeyDown={handleSeekKeyDown}
                 >
                   <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] rounded-full shadow-[0_0_10px_rgba(56,189,248,0.4)]" style={{ width: `${progressPercentage}%` }} />
                   <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md opacity-0 group-hover/progress:opacity-100 transition-opacity duration-200 pointer-events-none" style={{ left: `calc(${progressPercentage}% - 6px)` }} />
@@ -367,15 +400,15 @@ export default function GlobalPlayer() {
 
             <div className="player-right-controls flex items-center gap-3 relative w-[26%] justify-start shrink-0 ml-0 mt-2 pr-0">
               <div className="flex items-center gap-2 rounded-full bg-[rgba(56,189,248,0.08)] backdrop-blur-md px-2.5 py-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.25)] mr-2 translate-x-[-10px] translate-y-[6px]">
-                <button onClick={toggleMute} title={volume === 0 ? "Unmute" : "Mute"} className="player-ctrl-btn text-sm hover:text-white">
+                <button onClick={toggleMute} title={volume === 0 ? "Unmute" : "Mute"} aria-label={volume === 0 ? "Unmute" : "Mute"} className="player-ctrl-btn text-sm hover:text-white">
                   {volume === 0 ? <FiVolumeX /> : volume < 0.5 ? <FiVolume1 /> : <FiVolume2 />}
                 </button>
-                <input type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-[rgba(147,197,253,0.25)] accent-[#38bdf8]"/>
+                <input type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} aria-label="Volume" className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-[rgba(147,197,253,0.25)] accent-[#38bdf8]"/>
               </div>
 
               <div className="flex items-center gap-1.5 border-l border-white/10 pl-3 h-6 translate-y-[2px]">
-                <button onClick={() => setIsListOpen(!isListOpen)} title={isListOpen ? "Close queue" : "Open queue"} className={`player-ctrl-btn text-sm transition-colors ${isListOpen ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : 'hover:text-white'}`}><FiList /></button>
-                <button onClick={handleMinimize} title="Minimize Player" className="player-ctrl-btn text-sm text-zinc-400 hover:text-[#38bdf8] transition-colors ml-1"><FiMinimize2 /></button>
+                <button onClick={() => setIsListOpen(!isListOpen)} title={isListOpen ? "Close queue" : "Open queue"} aria-label={isListOpen ? "Close queue" : "Open queue"} aria-expanded={isListOpen} className={`player-ctrl-btn text-sm transition-colors ${isListOpen ? 'text-[#38bdf8] drop-shadow-[0_0_8px_#38bdf8]' : 'hover:text-white'}`}><FiList /></button>
+                <button onClick={handleMinimize} title="Minimize Player" aria-label="Minimize player" className="player-ctrl-btn text-sm text-zinc-400 hover:text-[#38bdf8] transition-colors ml-1"><FiMinimize2 /></button>
               </div>
 
               {/* QUEUE POPUP */}
@@ -400,20 +433,24 @@ export default function GlobalPlayer() {
                       {playlist.map((track, index) => {
                         const isActive = currentTrack.title === track.title;
                         return (
-                          <div 
-                            key={index} 
-                            onClick={() => { setTrackIndex(index); setIsPlaying(true); setIsListOpen(false); }} 
-                            className={`w-full text-left p-2 rounded-md flex items-center transition-colors duration-150 cursor-pointer select-none ${isActive ? 'bg-[rgba(255,255,255,0.1)]' : 'bg-transparent hover:bg-[rgba(255,255,255,0.05)]'}`}
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => { setTrackIndex(index); setIsPlaying(true); setIsListOpen(false); }}
+                            aria-current={isActive ? "true" : undefined}
+                            className={`w-full text-left p-2 rounded-md flex items-center transition-colors duration-150 cursor-pointer select-none border-none ${isActive ? 'bg-[rgba(255,255,255,0.1)]' : 'bg-transparent hover:bg-[rgba(255,255,255,0.05)]'}`}
                           >
                             {/* Track Image */}
                             <div style={{ width: '40px', height: '40px', minWidth: '40px' }} className="bg-[#282828] rounded shrink-0 overflow-hidden flex items-center justify-center relative shadow-sm mr-3">
                               {track.image && (
-                                <img 
-                                  src={track.image} 
-                                  alt="" 
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                  className="block" 
-                                  onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+                                <Image
+                                  src={track.image}
+                                  alt=""
+                                  fill
+                                  sizes="40px"
+                                  style={{ objectFit: 'cover' }}
+                                  className="block"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                 />
                               )}
                               
@@ -434,7 +471,7 @@ export default function GlobalPlayer() {
                                 {track.artist}
                               </p>
                             </div>
-                          </div>
+                          </button>
                         )
                       })}
                     </div>
@@ -467,13 +504,17 @@ export default function GlobalPlayer() {
               style={{ width: '44px', height: '44px', minWidth: '44px', minHeight: '44px' }} 
               className="rounded-full bg-black shrink-0 overflow-hidden shadow-md relative pointer-events-none"
             >
-              <img 
-                src={currentTrack.image} 
-                alt=""
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                className={`block ${isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`} 
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
+              {currentTrack.image && (
+                <Image
+                  src={currentTrack.image}
+                  alt=""
+                  fill
+                  sizes="44px"
+                  style={{ objectFit: 'cover' }}
+                  className={`block ${isPlaying ? 'animate-[spin_8s_linear_infinite]' : ''}`}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              )}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#050505] rounded-full border border-zinc-800" />
             </div>
 
@@ -487,21 +528,23 @@ export default function GlobalPlayer() {
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <button 
-                onPointerDown={(e) => e.stopPropagation()} 
-                onClick={() => setIsPlaying(!isPlaying)} 
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setIsPlaying(!isPlaying)}
                 title={isPlaying ? "Pause" : "Play"}
+                aria-label={isPlaying ? "Pause" : "Play"}
                 className="player-ctrl-btn text-lg text-white hover:text-[#38bdf8] hover:scale-110 active:scale-95 transition-all"
               >
                 {isPlaying ? <FiPause className="fill-white hover:fill-[#38bdf8] transition-colors" /> : <FiPlay className="translate-x-[1px] fill-white hover:fill-[#38bdf8] transition-colors" />}
               </button>
-              
+
               <div className="w-[1px] h-4 bg-white/10" />
-              
-              <button 
-                onPointerDown={(e) => e.stopPropagation()} 
-                onClick={() => setIsMinimized(false)} 
+
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setIsMinimized(false)}
                 title="Expand Player"
+                aria-label="Expand player"
                 className="player-ctrl-btn text-sm text-zinc-400 hover:text-white transition-colors"
               >
                 <FiMaximize2 />

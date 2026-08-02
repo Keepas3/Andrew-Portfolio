@@ -16,7 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Andrew's Portfolio",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: {
+    default: "Andrew's Portfolio",
+    template: "%s | Andrew's Portfolio",
+  },
   description: "Check out my work",
 };
 

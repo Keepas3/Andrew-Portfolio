@@ -44,6 +44,7 @@ export default function SyncedAlbumTrackPlayer({
         type="button"
         onClick={onPlayToggle}
         title={isActive && isPlaying ? "Pause" : "Play"}
+        aria-label={isActive && isPlaying ? "Pause" : "Play"}
         style={{
           width: "32px",
           height: "32px",
@@ -81,6 +82,7 @@ export default function SyncedAlbumTrackPlayer({
             step={0.1}
             value={currentTime}
             onChange={handleSeek}
+            aria-label="Seek"
             style={{
               flex: 1,
               height: "4px",
