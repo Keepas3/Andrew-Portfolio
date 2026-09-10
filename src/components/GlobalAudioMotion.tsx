@@ -37,8 +37,22 @@ export default function GlobalAudioMotion() {
 
     const root = document.documentElement;
     let animationFrameId = 0;
+    let lastTickTime = 0;
+    // Writing CSS custom properties on :root triggers a style recalculation
+    // for every element site-wide that references them in a box-shadow —
+    // dozens of elements, potentially many more on pages with long album
+    // grids. Throttling how often we actually write (rather than doing it
+    // every animation frame) is the main lever on "the site feels laggy
+    // while music plays".
+    const targetTickInterval = 1000 / 30;
 
-    const tick = () => {
+    const tick = (time: number) => {
+      if (time - lastTickTime < targetTickInterval) {
+        animationFrameId = requestAnimationFrame(tick);
+        return;
+      }
+      lastTickTime = time;
+
       const analyser = (window as Window & { globalAudioAnalyser?: AnalyserNode }).globalAudioAnalyser;
       const dataArray = (window as Window & { globalAudioDataArray?: Uint8Array }).globalAudioDataArray;
 
@@ -69,6 +83,15 @@ export default function GlobalAudioMotion() {
       root.style.setProperty("--audio-bass", s.bass.toFixed(3));
       root.style.setProperty("--audio-mid", s.mid.toFixed(3));
       root.style.setProperty("--audio-high", s.high.toFixed(3));
+
+      // Mirror the same smoothed values onto window so other JS-driven
+      // effects (e.g. ElectricBorder's canvas animation) can read them
+      // without each re-sampling the analyser or forcing a style read.
+      (window as Window & { __audioBands?: { bass: number; mid: number; high: number } }).__audioBands = {
+        bass: s.bass,
+        mid: s.mid,
+        high: s.high,
+      };
 
       animationFrameId = requestAnimationFrame(tick);
     };

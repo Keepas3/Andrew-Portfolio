@@ -38,6 +38,56 @@
         opacity: 0.15;
     }
 
+    /* --- Electric Border (audio-reactive animated border wrapper) --- */
+    .electric-border {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        isolation: isolate;
+    }
+
+    .eb-canvas-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .eb-canvas {
+        display: block;
+    }
+
+    .eb-layers {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .eb-glow-1,
+    .eb-glow-2 {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        box-sizing: border-box;
+    }
+
+    .eb-glow-1 {
+        border: 1px solid color-mix(in srgb, var(--electric-border-color) 55%, transparent);
+        filter: blur(1px);
+        opacity: calc(0.35 + var(--audio-bass, 0) * 0.55);
+    }
+
+    .eb-glow-2 {
+        border: 1px solid var(--electric-border-color);
+        filter: blur(6px);
+        opacity: calc(0.12 + var(--audio-mid, 0) * 0.45);
+    }
+
     /* --- Navigation Bar --- */
     .navbar {
         position: fixed;

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from "@/components/Navbar";
 import SyncedAlbumTrackPlayer from "@/components/SyncedAlbumTrackPlayer";
+import ElectricBorder from "@/components/ElectricBorder";
 import { motion } from 'framer-motion';
 import { playGlobalTrack, toggleGlobalAudio } from '@/lib/globalAudio';
 
@@ -130,31 +131,35 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              style={{
-                flex: '1 1 400px',
-                maxWidth: '480px',
-                position: 'relative',
-                aspectRatio: '1 / 1',
-                backgroundColor: '#0a0708',
-                boxShadow: '0 25px 60px rgba(0,0,0,0.8), 0 0 calc(6px + var(--audio-bass, 0) * 20px) rgba(56, 189, 248, calc(var(--audio-bass, 0) * 0.3))',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '4px',
-                overflow: 'hidden'
-              }}
+              style={{ flex: '1 1 400px', maxWidth: '480px' }}
             >
-              {album.image ? (
-                <Image
-                  src={album.image}
-                  alt={album.title}
-                  fill
-                  sizes="(max-width: 768px) 90vw, 480px"
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#52525b', fontFamily: 'monospace', fontSize: '14px' }}>
-                  NO COVER ART
-                </div>
-              )}
+              <ElectricBorder
+                color="#38bdf8"
+                speed={0.8}
+                chaos={0.12}
+                borderRadius={4}
+                style={{
+                  aspectRatio: '1 / 1',
+                  backgroundColor: '#0a0708',
+                  boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  overflow: 'hidden'
+                }}
+              >
+                {album.image ? (
+                  <Image
+                    src={album.image}
+                    alt={album.title}
+                    fill
+                    sizes="(max-width: 768px) 90vw, 480px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#52525b', fontFamily: 'monospace', fontSize: '14px' }}>
+                    NO COVER ART
+                  </div>
+                )}
+              </ElectricBorder>
             </motion.div>
 
             <motion.div

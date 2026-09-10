@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import ElectricBorder from "@/components/ElectricBorder";
 import { FiPlay, FiPause } from "react-icons/fi";
 
 export interface MiniProject {
@@ -56,8 +57,20 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
   // =======================================================================
   useEffect(() => {
     let animationFrameId: number;
+    let lastFrameTime = 0;
+    // Each bar write sets `height`, which forces a layout recalc (not just
+    // paint) — with up to 96 bars that adds up fast at full refresh rate.
+    // Capping to ~30fps keeps the visualizer smooth-looking while cutting
+    // that cost by half or more.
+    const targetFrameInterval = 1000 / 30;
 
-    const renderFrame = () => {
+    const renderFrame = (time: number) => {
+      if (time - lastFrameTime < targetFrameInterval) {
+        animationFrameId = requestAnimationFrame(renderFrame);
+        return;
+      }
+      lastFrameTime = time;
+
       const analyser = (window as any).globalAudioAnalyser;
       const dataArray = (window as any).globalAudioDataArray;
 
@@ -92,11 +105,11 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
           }
         }
       } else {
-        const time = Date.now() / 1000;
+        const idleSeconds = time / 1000;
         for (let i = 0; i < totalBars; i++) {
           if (barsRef.current[i]) {
             const centerDist = Math.abs(i - trueCenter) / trueCenter;
-            const wave = Math.sin(time * 2 + i * 0.1) * 10;
+            const wave = Math.sin(idleSeconds * 2 + i * 0.1) * 10;
             const percent = Math.max(2, 15 * (1 - centerDist) + wave);
             barsRef.current[i]!.style.height = `${percent}%`;
           }
@@ -106,7 +119,7 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
       animationFrameId = requestAnimationFrame(renderFrame);
     };
 
-    renderFrame();
+    animationFrameId = requestAnimationFrame(renderFrame);
 
     return () => cancelAnimationFrame(animationFrameId);
   }, [totalBars]);
@@ -210,7 +223,8 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
           className="flex flex-col w-full mb-24 mt-4"
         >
 
-          <motion.div variants={fadeInUp} className="status-box justify-between min-h-[160px] w-full transition-all duration-300 hover:border-[#38bdf8]/20 bg-zinc-950/40 backdrop-blur-md">
+          <motion.div variants={fadeInUp}>
+          <ElectricBorder color="#38bdf8" speed={0.8} chaos={0.12} borderRadius={16} className="status-box justify-between min-h-[160px] w-full transition-all duration-300 hover:border-[#38bdf8]/20 bg-zinc-950/40 backdrop-blur-md">
             <div className="w-full">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-serif font-bold text-white">Latest Release</h3>
@@ -256,13 +270,14 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
                 View Full Archives <span>→</span>
               </Link>
             </div>
+          </ElectricBorder>
           </motion.div>
 
           <motion.div
             variants={fadeInUp}
-            className="status-box justify-between min-h-[160px] w-full transition-all duration-300 hover:border-amber-500/20 bg-zinc-950/40 backdrop-blur-md"
             style={{ marginTop: '4rem' }}
           >
+          <ElectricBorder color="#f59e0b" speed={0.8} chaos={0.12} borderRadius={16} className="status-box justify-between min-h-[160px] w-full transition-all duration-300 hover:border-amber-500/20 bg-zinc-950/40 backdrop-blur-md">
             <div className="w-full">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-serif font-bold text-white">In-Progress Works</h3>
@@ -312,6 +327,7 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
                 Check out WIP <span>→</span>
               </Link>
             </div>
+          </ElectricBorder>
           </motion.div>
         </motion.section>
 

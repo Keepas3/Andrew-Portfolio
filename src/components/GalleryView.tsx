@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import ElectricBorder from "@/components/ElectricBorder";
 
 export interface GalleryItem {
   title: string;
@@ -323,7 +324,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                   <button onClick={prevSlide} className="gallery-control-btn left">&#10094;</button>
 
                   {/* FIXED: Removed the wide sliding horizontal track block entirely */}
-                  <div className="gallery-slide-window-dynamic">
+                  <ElectricBorder color="#e5729f" speed={0.8} chaos={0.1} borderRadius={16} className="gallery-slide-window-dynamic">
                     {/* Mounting ONLY the current active image layer allows the frame box outline to shrink perfectly to its exact pixel width */}
                     <div className="gallery-slide-active">
                       {filteredSlides[currentIndex]?.url && (
@@ -338,7 +339,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                         />
                       )}
                     </div>
-                  </div>
+                  </ElectricBorder>
 
                   {/* Outer Right Navigation Button Arrow */}
                   <button onClick={nextSlide} className="gallery-control-btn right">&#10095;</button>

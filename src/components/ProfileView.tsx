@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion, Variants } from 'framer-motion';
 import { SiSpotify } from 'react-icons/si';
 import Navbar from "@/components/Navbar";
+import ElectricBorder from "@/components/ElectricBorder";
 import { urlFor } from '@/sanity/lib/image';
 
 interface SocialLink {
@@ -105,13 +106,13 @@ export default function ProfileView({ profile }: ProfileViewProps) {
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
-          className="profile-header"
         >
+        <ElectricBorder color="#38bdf8" speed={0.7} chaos={0.1} borderRadius={24} className="profile-header">
           <div className="profile-title-row">
             {avatarUrl ? (
-              <div className="avatar-container shadow-xl">
+              <ElectricBorder color="#38bdf8" speed={0.9} chaos={0.16} borderRadius={9999} className="avatar-container shadow-xl">
                 <Image src={avatarUrl} alt="Profile Picture" width={110} height={110} sizes="110px" />
-              </div>
+              </ElectricBorder>
             ) : null}
 
             <div>
@@ -125,6 +126,7 @@ export default function ProfileView({ profile }: ProfileViewProps) {
           <p className="profile-bio">
             {currentProfile.biography || ''}
           </p>
+        </ElectricBorder>
         </motion.section>
 
         <motion.section
@@ -135,7 +137,8 @@ export default function ProfileView({ profile }: ProfileViewProps) {
           className="status-rows-container"
         >
           <div className="top-activity-row">
-            <motion.div variants={fadeInUp} className="status-box">
+            <motion.div variants={fadeInUp}>
+            <ElectricBorder color="#38bdf8" speed={0.8} chaos={0.12} borderRadius={12} className="status-box">
               <h3>{programsTitle || 'Programs I use'}</h3>
               <div className="section-divider" />
               {programsDescription ? <p className="status-text mb-4">{programsDescription}</p> : null}
@@ -146,9 +149,11 @@ export default function ProfileView({ profile }: ProfileViewProps) {
                   </span>
                 )) : null}
               </div>
+            </ElectricBorder>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="status-box flex flex-col justify-between h-full">
+            <motion.div variants={fadeInUp}>
+            <ElectricBorder color="#1DB954" speed={0.8} chaos={0.12} borderRadius={12} className="status-box flex flex-col justify-between h-full">
               <div className="w-full">
                 <div className="flex items-center justify-between">
                   <h3>Now Listening</h3>
@@ -171,11 +176,13 @@ export default function ProfileView({ profile }: ProfileViewProps) {
                   />
                 ) : null}
               </div>
+            </ElectricBorder>
             </motion.div>
           </div>
 
           <div className="top-activity-row">
-            <motion.div variants={fadeInUp} className="status-box flex flex-col justify-between">
+            <motion.div variants={fadeInUp}>
+            <ElectricBorder color="#e5729f" speed={0.8} chaos={0.12} borderRadius={12} className="status-box flex flex-col justify-between">
               <div>
                 <h3>{favoritesTitle || 'Stuff I like to do'}</h3>
                 <div className="section-divider" />
@@ -195,9 +202,11 @@ export default function ProfileView({ profile }: ProfileViewProps) {
                   </div>
                 )) : null}
               </div>
+            </ElectricBorder>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="status-box flex flex-col justify-between">
+            <motion.div variants={fadeInUp}>
+            <ElectricBorder color="#38bdf8" speed={0.8} chaos={0.12} borderRadius={12} className="status-box flex flex-col justify-between">
               <div>
                 <h3>{connectTitle || 'Collaborate / Connect'}</h3>
                 <div className="section-divider" />
@@ -220,6 +229,7 @@ export default function ProfileView({ profile }: ProfileViewProps) {
                   </a>
                 ))}
               </div>
+            </ElectricBorder>
             </motion.div>
           </div>
         </motion.section>
