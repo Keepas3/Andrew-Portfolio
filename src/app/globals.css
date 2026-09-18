@@ -635,8 +635,16 @@
            instead of floating on top of it. */
         position: sticky !important;
         bottom: 24px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
+        /* Centered via left/right + auto margins rather than the classic
+           left:50%+translateX(-50%) trick — that trick centers relative to
+           whatever counts as this element's containing block, which is the
+           viewport for `fixed` but .site-content for `sticky`, and the two
+           don't always agree on mobile. left/right auto-margin centering
+           gives the same result under both. */
+        left: 0 !important;
+        right: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
         width: 90% !important;
         max-width: 900px !important; /* Fixed invalid max-width property */
         height: 70px !important;
@@ -737,8 +745,21 @@
             position: relative;
             left: 0;
             transform: none;
+            /* The base rule's `width: max-content` forces this to size
+               wide enough to fit the copyright line and the Privacy &
+               Terms link on one row — on narrow screens that's wider than
+               the viewport, causing page-wide horizontal overflow. Let it
+               size to the available width instead so flex-wrap can
+               actually wrap them onto separate lines. */
+            width: 100%;
+            max-width: 100%;
+            /* Once wrapped onto two lines on mobile, the row is now full
+               width, so the flex row's default left-alignment leaves the
+               wrapped "Privacy & Terms" line sitting at the left edge
+               instead of centered under the copyright line. */
+            justify-content: center;
         }
-        
+
         .page-container {
             padding: 100px 1.25rem 3rem 1.25rem !important;
         }

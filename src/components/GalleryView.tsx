@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import ElectricBorder from "@/components/ElectricBorder";
@@ -29,6 +29,27 @@ export default function GalleryView({ topics }: GalleryViewProps) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [albumIndex, setAlbumIndex] = useState(0);
+
+  // The coverflow cards below were built with a hardcoded 630px width,
+  // which overflows the viewport on any screen narrower than that (i.e.
+  // every phone). Track a responsive card width instead so both the card
+  // itself and the spacing between cards scale down together. Measured
+  // from the actual rendered container (via ResizeObserver) rather than
+  // window.innerWidth — some rendering/preview pipelines report a
+  // window.innerWidth that doesn't match the real visible viewport, which
+  // silently defeats a window.innerWidth-based calculation.
+  const coverflowContainerRef = useRef<HTMLDivElement>(null);
+  const [cardWidth, setCardWidth] = useState(630);
+
+  useEffect(() => {
+    const container = coverflowContainerRef.current;
+    if (!container) return;
+    const updateCardWidth = () => setCardWidth(Math.min(630, container.clientWidth * 0.82));
+    updateCardWidth();
+    const observer = new ResizeObserver(updateCardWidth);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // --- UPDATED Helper: Grabs the first image from the nested array ---
   const getTopicCover = (topic: Topic) => {
@@ -99,7 +120,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
               <p className="text-center text-white/30 italic">No albums created yet.</p>
             ) : (
               // ─── BULLETPROOF 3D CONTAINER ───
-              <div style={{
+              <div ref={coverflowContainerRef} style={{
                 position: 'relative',
                 width: '100%',
                 maxWidth: '1200px',
@@ -171,9 +192,13 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                   const isFront = absOffset === 0;
 
                   const sign = Math.sign(offset);
-                  // Adjusted math to push the giant cards wide enough apart
-                  const translateX = sign * 340 + (sign * absOffset * 60);
-                  const translateZ = -absOffset * 300;
+                  // Spacing/depth scale with the card width so the fanned
+                  // side cards keep the same proportions at any screen size
+                  // instead of overlapping oddly once cards shrink below
+                  // their original 630px design width.
+                  const cardScale = cardWidth / 630;
+                  const translateX = (sign * 340 + (sign * absOffset * 60)) * cardScale;
+                  const translateZ = -absOffset * 300 * cardScale;
                   const rotateY = sign * -25;
 
                   const coverUrl = getTopicCover(topic);
@@ -189,7 +214,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                         flexDirection: 'column',
                         alignItems: 'center',
                         cursor: 'pointer',
-                        width: '630px', // Massive fixed width
+                        width: `${cardWidth}px`,
                         transition: 'all 0.7s cubic-bezier(0.25, 1, 0.5, 1)',
                         transform: `perspective(1200px) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg)`,
                         zIndex: 50 - absOffset,
@@ -214,7 +239,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                               src={coverUrl}
                               alt={topic.title}
                               fill
-                              sizes="630px"
+                              sizes={`${Math.round(cardWidth)}px`}
                               style={{ objectFit: 'cover', zIndex: 0 }}
                             />
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent, transparent)', opacity: 0.7, zIndex: 10, pointerEvents: 'none' }} />
