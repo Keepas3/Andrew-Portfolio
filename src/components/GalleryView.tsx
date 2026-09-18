@@ -130,7 +130,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                     cursor: 'pointer',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.9)'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5729f'}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#38bdf8'}
                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" style={{ width: '32px', height: '32px', transform: 'translateX(-2px)' }}>
@@ -156,7 +156,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                     cursor: 'pointer',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.9)'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5729f'}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#38bdf8'}
                   onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" style={{ width: '32px', height: '32px', transform: 'translateX(2px)' }}>
@@ -204,7 +204,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                         borderRadius: '16px',
                         overflow: 'hidden',
                         backgroundColor: 'black',
-                        boxShadow: `${isFront ? '0 25px 60px rgba(229,114,159,0.3)' : '0 15px 50px rgba(0,0,0,0.9)'}, 0 0 calc(6px + var(--audio-mid, 0) * 18px) rgba(229, 114, 159, calc(var(--audio-mid, 0) * 0.3))`,
+                        boxShadow: `${isFront ? '0 25px 60px rgba(56,189,248,0.3)' : '0 15px 50px rgba(0,0,0,0.9)'}, 0 0 calc(6px + var(--audio-mid, 0) * 18px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.3))`,
                         transform: isFront ? 'scale(1.02)' : 'scale(1)',
                         transition: 'all 0.5s ease-out'
                       }}>
@@ -234,7 +234,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                         opacity: isFront ? 1 : 0,
                         transition: 'opacity 0.5s ease-out'
                       }}>
-                        <h3 style={{ color: '#e5729f', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '24px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                        <h3 style={{ color: '#38bdf8', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '24px', margin: 0, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
                           {topic.title}
                         </h3>
                         {topic.description && (
@@ -324,7 +324,7 @@ export default function GalleryView({ topics }: GalleryViewProps) {
                   <button onClick={prevSlide} className="gallery-control-btn left">&#10094;</button>
 
                   {/* FIXED: Removed the wide sliding horizontal track block entirely */}
-                  <ElectricBorder color="#e5729f" speed={0.8} chaos={0.1} borderRadius={16} className="gallery-slide-window-dynamic">
+                  <ElectricBorder color="#38bdf8" speed={0.8} chaos={0.1} borderRadius={16} className="gallery-slide-window-dynamic">
                     {/* Mounting ONLY the current active image layer allows the frame box outline to shrink perfectly to its exact pixel width */}
                     <div className="gallery-slide-active">
                       {filteredSlides[currentIndex]?.url && (

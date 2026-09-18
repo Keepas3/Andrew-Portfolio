@@ -101,7 +101,7 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
             const heightBoost = totalBars <= 32 ? 80 : 110;
             const percent = Math.max(2, Math.min(100, dynamicCurve * heightBoost * edgeDampener));
 
-            barsRef.current[i]!.style.height = `${percent}%`;
+            barsRef.current[i]!.style.transform = `scaleY(${percent / 100})`;
           }
         }
       } else {
@@ -111,7 +111,7 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
             const centerDist = Math.abs(i - trueCenter) / trueCenter;
             const wave = Math.sin(idleSeconds * 2 + i * 0.1) * 10;
             const percent = Math.max(2, 15 * (1 - centerDist) + wave);
-            barsRef.current[i]!.style.height = `${percent}%`;
+            barsRef.current[i]!.style.transform = `scaleY(${percent / 100})`;
           }
         }
       }
@@ -172,9 +172,13 @@ export default function HomeView({ completedProjects, wipProjects }: HomeViewPro
                   flex: 1,
                   minWidth: '4px',
                   maxWidth: totalBars <= 32 ? '14px' : '20px',
-                  height: "2%",
-                  transition: 'height 0.05s linear',
-
+                  // Scaled via transform (GPU-composited, no layout) instead
+                  // of animating `height` (forces reflow) — same look, much
+                  // cheaper to update 30x/sec across up to 80 bars.
+                  height: '100%',
+                  transform: 'scaleY(0.02)',
+                  transformOrigin: 'bottom',
+                  transition: 'transform 0.05s linear',
 
                   background: `linear-gradient(to top, ${baseColor}, ${midColor}, transparent)`,
                   boxShadow: `0 0 12px ${glowColor}, 0 0 4px ${glowColor}`

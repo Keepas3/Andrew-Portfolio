@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import GlobalPlayer from "@/components/GlobalPlayer";
+import SiteContent from "@/components/SiteContent";
 import GlobalAudioMotion from "@/components/GlobalAudioMotion";
 import Footer from "@/components/Footer";
 
@@ -36,11 +36,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <GlobalAudioMotion />
-        {/* Main application page routing */}
-        {children}
-        
-        {/* Sits globally outside page mounts so navigation doesn't disrupt animations */}
-        <GlobalPlayer />
+        {/* Main application page routing + the globally-persistent audio
+            player, wrapped together so the player's sticky bottom edge
+            tucks away right where the footer begins (see .site-content
+            in globals.css) */}
+        <SiteContent>{children}</SiteContent>
         <Footer />
       </body>
     </html>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from "@/components/Navbar";
+import ElectricBorder from "@/components/ElectricBorder";
 
 export interface AlbumItem {
   title: string;
@@ -60,8 +61,12 @@ export default function AlbumsView({ albums }: AlbumsViewProps) {
 
                   {/* --- IMAGE CONTAINER --- */}
                   {/* FIXED: Removed all borders to kill the purple outline glitch */}
-                  <div
-                    className="album-card-frame w-full aspect-square bg-[#0a0708] overflow-hidden relative mb-3 rounded-sm"
+                  <ElectricBorder
+                    color="#38bdf8"
+                    speed={0.8}
+                    chaos={0.12}
+                    borderRadius={2}
+                    className="album-card-frame w-full aspect-square bg-[#0a0708] overflow-hidden relative mb-3"
                     style={{ border: 'none', outline: 'none' }}
                   >
                     {album.image ? (
@@ -79,7 +84,7 @@ export default function AlbumsView({ albums }: AlbumsViewProps) {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
-                  </div>
+                  </ElectricBorder>
 
                   {/* --- TEXT CONTAINER --- */}
                   <div className="flex flex-col px-1">

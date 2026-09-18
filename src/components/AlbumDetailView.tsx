@@ -248,15 +248,17 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
                       const isActive = isAudio && activeSrc === track.mediaUrl;
 
                       return (
-                        <div
+                        <ElectricBorder
                           key={i}
+                          color={isActive ? "#38bdf8" : "#0ea5e9"}
+                          speed={isActive ? 0.8 : 0.5}
+                          chaos={isActive ? 0.1 : 0.06}
+                          borderRadius={6}
                           style={{
                             display: 'flex',
                             flexDirection: 'column',
                             padding: '12px 16px',
-                            background: isActive ? 'rgba(56,189,248,0.06)' : 'rgba(255,255,255,0.02)',
-                            border: isActive ? '1px solid rgba(56,189,248,0.25)' : '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: '6px'
+                            background: isActive ? 'rgba(56,189,248,0.06)' : 'rgba(255,255,255,0.02)'
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -306,7 +308,7 @@ export default function AlbumDetailView({ album }: AlbumDetailViewProps) {
                               )}
                             </div>
                           )}
-                        </div>
+                        </ElectricBorder>
                       );
                     })}
                   </div>

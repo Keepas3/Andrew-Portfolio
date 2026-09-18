@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { SiGithub, SiSpotify, SiOsu } from 'react-icons/si';
 
 export default function Footer() {
@@ -9,8 +10,15 @@ export default function Footer() {
       <div className="footer-content">
         
         {/* Left Side: Copyright & Basics */}
-        <div className="footer-basics">
+        <div className="footer-basics flex items-center flex-wrap" style={{ gap: '1.5rem' }}>
           <p className="footer-name m-0">© {currentYear} Andrew Cespon. All rights reserved.</p>
+          <Link
+            href="/legal"
+            className="footer-name hover:!text-[#38bdf8] transition-colors"
+            style={{ textDecoration: 'none' }}
+          >
+            Privacy &amp; Terms
+          </Link>
         </div>
 
         {/* Right Side: Social Links (Ready for when you uncomment them) */}

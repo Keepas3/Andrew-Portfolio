@@ -182,7 +182,7 @@ export default function ProfileView({ profile }: ProfileViewProps) {
 
           <div className="top-activity-row">
             <motion.div variants={fadeInUp}>
-            <ElectricBorder color="#e5729f" speed={0.8} chaos={0.12} borderRadius={12} className="status-box flex flex-col justify-between">
+            <ElectricBorder color="#60a5fa" speed={0.8} chaos={0.12} borderRadius={12} className="status-box flex flex-col justify-between">
               <div>
                 <h3>{favoritesTitle || 'Stuff I like to do'}</h3>
                 <div className="section-divider" />

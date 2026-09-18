@@ -164,6 +164,13 @@ export default function ElectricBorder({
     let height = 0;
     let lastDpr = Math.min(window.devicePixelRatio || 1, 2);
 
+    // The traced path's geometry (sample point positions along the rounded
+    // rect) only depends on the container's size, not on time — so it's
+    // computed once here and cached, instead of being recomputed from
+    // scratch for every sample point on every single animation frame.
+    // Only the noise displacement in draw() actually needs to run per frame.
+    let basePoints: { x: number; y: number }[] = [];
+
     const updateSize = () => {
       const rect = container.getBoundingClientRect();
       width = rect.width + borderOffset * 2;
@@ -174,6 +181,21 @@ export default function ElectricBorder({
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
+
+      const left = borderOffset;
+      const top = borderOffset;
+      const borderWidth = Math.max(width - borderOffset * 2, 1);
+      const borderHeight = Math.max(height - borderOffset * 2, 1);
+      const maxRadius = Math.min(borderWidth, borderHeight) / 2;
+      const radius = Math.min(borderRadius, maxRadius);
+
+      const approxPerimeter = 2 * (borderWidth + borderHeight);
+      const sampleCount = Math.max(24, Math.floor(approxPerimeter / 5));
+
+      basePoints = [];
+      for (let i = 0; i <= sampleCount; i++) {
+        basePoints.push(getRoundedRectPoint(i / sampleCount, left, top, borderWidth, borderHeight, radius));
+      }
     };
 
     updateSize();
@@ -224,20 +246,12 @@ export default function ElectricBorder({
       ctx.lineJoin = "round";
 
       const amplitude = chaos * chaosScale;
-      const left = borderOffset;
-      const top = borderOffset;
-      const borderWidth = Math.max(width - borderOffset * 2, 1);
-      const borderHeight = Math.max(height - borderOffset * 2, 1);
-      const maxRadius = Math.min(borderWidth, borderHeight) / 2;
-      const radius = Math.min(borderRadius, maxRadius);
-
-      const approxPerimeter = 2 * (borderWidth + borderHeight);
-      const sampleCount = Math.max(24, Math.floor(approxPerimeter / 5));
+      const sampleCount = basePoints.length - 1;
 
       ctx.beginPath();
       for (let i = 0; i <= sampleCount; i++) {
         const progress = i / sampleCount;
-        const point = getRoundedRectPoint(progress, left, top, borderWidth, borderHeight, radius);
+        const point = basePoints[i];
 
         const xNoise = octavedNoise(progress * 8, octaves, lacunarity, gain, amplitude, baseFrequency, timeRef.current, 0);
         const yNoise = octavedNoise(progress * 8, octaves, lacunarity, gain, amplitude, baseFrequency, timeRef.current, 1);

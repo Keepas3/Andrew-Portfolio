@@ -13,6 +13,16 @@
     html {
         scroll-behavior: smooth;
         overflow-y: scroll;
+        /* Lives on html (not body) so body's own overflow-y stays the
+           browser default (visible) — declaring overflow-x without
+           overflow-y on the same element forces that element's other
+           axis to compute as `auto`, which makes it register as a CSS
+           "scroll container" even though nothing inside it actually
+           overflows its own box. That silently broke `position: sticky`
+           for descendants (e.g. the global audio player), since sticky
+           positioning got computed against body's own bounding box
+           instead of the real, viewport-scrolling `html` element. */
+        overflow-x: hidden;
     }
 
     body {
@@ -20,7 +30,6 @@
         color: #ffffff;
         background: linear-gradient(to bottom, #030712 0%, #000000 100%);
         background-attachment: fixed;
-        overflow-x: hidden;
         min-height: 100vh;
         width: 100%;
     }
@@ -52,7 +61,10 @@
         left: 50%;
         transform: translate(-50%, -50%);
         pointer-events: none;
-        z-index: -1;
+        /* Drawn above the wrapped content (not behind it) so the line is
+           still visible when that content is an opaque, full-bleed image —
+           e.g. album art — rather than being hidden underneath it. */
+        z-index: 2;
     }
 
     .eb-canvas {
@@ -64,7 +76,7 @@
         inset: 0;
         border-radius: inherit;
         pointer-events: none;
-        z-index: -1;
+        z-index: 2;
     }
 
     .eb-glow-1,
@@ -441,7 +453,9 @@
         background: rgba(3, 7, 18, 0.5);
         margin-top: auto;
         position: relative;
-        /* FIXED: Lowered z-index to 0 so it slides cleanly UNDER the z-999999 audio player */
+        /* z-index kept low/local; the audio player no longer overlaps this
+           footer at all (it's sticky-bounded to end right before this
+           element), so this is no longer a stacking-order workaround */
         z-index: 0;
         padding: 2rem !important; /* Normal, compact footer sizing */
         box-shadow: 0 -1px calc(5px + var(--audio-mid, 0) * 20px) rgba(56, 189, 248, calc(var(--audio-mid, 0) * 0.38));
@@ -602,11 +616,24 @@
         }
     }
 
+    /* Wraps page content + the global audio player; ends exactly where the
+       footer begins. .master-global-player is sticky-bounded by this, and
+       the minimized pill switches to position:absolute (anchored here)
+       once the footer is visible, so neither ever overlaps the footer. */
+    .site-content {
+        position: relative;
+    }
+
     /* ==========================================================================
    GLOBAL FLOATING AUDIO CORE OVERRIDE (COMPACT FLOATING DOCK)
    ========================================================================== */
 .master-global-player {
-        position: fixed !important;
+        /* Sticky (not fixed) so it's bounded by .site-content, which ends
+           right where the footer begins — it stays pinned near the bottom
+           of the viewport while scrolling through content, then tucks away
+           into its normal in-flow spot as the footer scrolls into view,
+           instead of floating on top of it. */
+        position: sticky !important;
         bottom: 24px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
@@ -625,7 +652,7 @@
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        box-shadow: 0 0 calc(22px + var(--audio-bass, 0) * 46px) rgba(56, 189, 248, calc(0.12 + var(--audio-bass, 0) * 0.5)) !important;
+        box-shadow: 0 0 calc(22px + var(--audio-bass, 0) * 36px) rgba(56, 189, 248, calc(0.12 + var(--audio-bass, 0) * 0.407)) !important;
     }
 
 /* --- TEXT AND TRACK INFO ALIGNMENT RESETS --- */

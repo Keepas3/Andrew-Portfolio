@@ -13,7 +13,11 @@ import {
 import { client } from '@/sanity/lib/client';
 import type { GlobalTrack } from '@/lib/globalAudio';
 
-export default function GlobalPlayer() {
+export default function GlobalPlayer({
+  dragConstraintsRef,
+}: {
+  dragConstraintsRef?: React.RefObject<HTMLDivElement | null>;
+}) {
   const popupRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -35,23 +39,30 @@ export default function GlobalPlayer() {
   const [volume, setVolume] = useState(1);
 
   const [isMinimized, setIsMinimized] = useState(false);
-  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  // Framer Motion's `drag` gesture doesn't play nicely with `position:
+  // sticky` (its layout measurement gets confused, leaving the pill stuck
+  // mid-animation) — so instead of sticky, the minimized pill stays
+  // `fixed` (as before) until the footer is about to be visible, then
+  // switches to `absolute` (anchored within .site-content, which ends
+  // exactly where the footer begins) so it tucks away instead of
+  // overlapping it. Both `fixed` and `absolute` are proven to work fine
+  // with `drag`.
+  const [footerVisible, setFooterVisible] = useState(false);
 
   useEffect(() => {
-    const updateConstraints = () => {
-      setDragConstraints({
-        left: -(window.innerWidth - 300), 
-        right: 20,
-        top: -(window.innerHeight - 150),
-        bottom: 20
-      });
-    };
-    
-    if (typeof window !== 'undefined') {
-      updateConstraints();
-      window.addEventListener('resize', updateConstraints);
-      return () => window.removeEventListener('resize', updateConstraints);
-    }
+    const footer = document.querySelector('.site-footer');
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setFooterVisible(entry.isIntersecting),
+      // Trigger the switch to `absolute` before the footer is actually
+      // visible (not right as its top edge crosses the viewport) — the
+      // pill's own height plus its bottom offset need to already have
+      // settled into place with margin to spare, or the flip happens a
+      // moment too late and it overlaps the footer's top edge.
+      { threshold: 0, rootMargin: '0px 0px 150px 0px' }
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
   }, []);
 
   const handleMinimize = () => {
@@ -490,14 +501,24 @@ export default function GlobalPlayer() {
         {isMinimized && (
           <motion.div
             drag
-            dragConstraints={dragConstraints}
+            dragConstraints={dragConstraintsRef}
             dragElastic={0.1}
             dragMomentum={false}
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 999999 }}
+            style={{
+              position: footerVisible ? 'absolute' : 'fixed',
+              // Extra clearance in the tucked-away (absolute) state: Framer
+              // Motion's own drag/entrance transform sits on top of this
+              // CSS position and isn't accounted for by a plain bottom
+              // offset, so a bit of margin keeps it clear of the footer
+              // rather than chasing the exact pixel offset.
+              bottom: footerVisible ? '4.5rem' : '2rem',
+              right: '2rem',
+              zIndex: 999999,
+            }}
             className="bg-[#050505]/95 backdrop-blur-xl border border-[#38bdf8]/50 p-2 pr-4 rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.8),0_0_15px_rgba(56,189,248,0.15)] flex items-center gap-3 cursor-grab active:cursor-grabbing hover:border-[#38bdf8]/80 transition-colors duration-300 max-w-[280px]"
           >
             <div 
