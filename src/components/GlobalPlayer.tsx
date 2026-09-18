@@ -8,10 +8,66 @@ import {
   FiShuffle, FiRepeat, FiList, FiSkipBack, 
   FiSkipForward, FiPlay, FiPause, 
   FiVolume2, FiVolume1, FiVolumeX,
-  FiMinimize2, FiMaximize2 
+  FiMinimize2, FiMaximize2, FiX
 } from "react-icons/fi";
 import { client } from '@/sanity/lib/client';
 import type { GlobalTrack } from '@/lib/globalAudio';
+
+function QueueRow({
+  track,
+  isActive,
+  isPlaying,
+  onClick,
+}: {
+  track: GlobalTrack;
+  isActive: boolean;
+  isPlaying: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={isActive ? "true" : undefined}
+      className={`w-full text-left p-3 rounded-lg flex items-center gap-4 transition-colors duration-150 cursor-pointer select-none border-none ${isActive ? 'bg-[rgba(56,189,248,0.08)]' : 'bg-transparent hover:bg-white/[0.04]'}`}
+    >
+      <div style={{ width: '48px', height: '48px', minWidth: '48px' }} className="bg-[#282828] rounded shrink-0 overflow-hidden flex items-center justify-center relative shadow-sm">
+        {track.image && (
+          <Image
+            src={track.image}
+            alt=""
+            fill
+            sizes="48px"
+            style={{ objectFit: 'cover' }}
+            className="block"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        )}
+
+        {isActive && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-pulse' : 'bg-[#38bdf8]'}`} />
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1 flex flex-col justify-center gap-1">
+        <p className={`text-[14px] font-medium truncate m-0 leading-tight ${isActive ? 'text-[#38bdf8]' : 'text-white'}`}>
+          {track.title}
+        </p>
+        <p className="text-[12px] truncate m-0 text-[#a7a7a7] leading-tight">
+          {track.artist}
+        </p>
+      </div>
+
+      {track.durationString && (
+        <span className="text-[11px] font-mono text-[#71717a] shrink-0 ml-2">
+          {track.durationString}
+        </span>
+      )}
+    </button>
+  );
+}
 
 export default function GlobalPlayer({
   dragConstraintsRef,
@@ -431,60 +487,51 @@ export default function GlobalPlayer({
                     animate={{ opacity: 1, y: 0, scale: 1 }} 
                     exit={{ opacity: 0, y: 10, scale: 0.95 }} 
                     transition={{ duration: 0.2, ease: "easeOut" }} 
-                    className="queue-popup absolute bottom-full mb-6 right-0 w-[340px] h-[400px] flex flex-col bg-[#121212]/95 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[999999] backdrop-blur-2xl text-[#38bdf8] font-bold"
+                    className="queue-popup absolute bottom-full mb-6 right-0 w-[360px] h-[460px] flex flex-col bg-[#0a0e14] border border-[rgba(255,255,255,0.1)] rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.7),0_0_30px_rgba(56,189,248,0.08)] z-[999999] backdrop-blur-md"
                   >
                     {/* Header */}
-                    <div className="flex items-center justify-between pb-3 mb-2 shrink-0 px-2">
-                      <h3 className="text-[14px] font-bold text-white tracking-wide m-0">Song Queue</h3>
-                      <span className="text-[12px] font-medium text-[#a7a7a7]">{playlist.length} Tracks</span>
+                    <div className="flex items-center justify-between pb-3 shrink-0 px-2">
+                      <h3 className="text-[16px] font-bold text-white tracking-wide m-0">Queue</h3>
+                      <button
+                        type="button"
+                        onClick={() => setIsListOpen(false)}
+                        title="Close queue"
+                        aria-label="Close queue"
+                        className="player-ctrl-btn text-base text-zinc-400 hover:text-white transition-colors border-none bg-transparent cursor-pointer p-1"
+                      >
+                        <FiX />
+                      </button>
                     </div>
 
-                    {/* Track List */}
-                    <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden overscroll-contain pr-1 [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-full transition-all">
-                      {playlist.map((track, index) => {
-                        const isActive = currentTrack.title === track.title;
-                        return (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => { setTrackIndex(index); setIsPlaying(true); setIsListOpen(false); }}
-                            aria-current={isActive ? "true" : undefined}
-                            className={`w-full text-left p-2 rounded-md flex items-center transition-colors duration-150 cursor-pointer select-none border-none ${isActive ? 'bg-[rgba(255,255,255,0.1)]' : 'bg-transparent hover:bg-[rgba(255,255,255,0.05)]'}`}
-                          >
-                            {/* Track Image */}
-                            <div style={{ width: '40px', height: '40px', minWidth: '40px' }} className="bg-[#282828] rounded shrink-0 overflow-hidden flex items-center justify-center relative shadow-sm mr-3">
-                              {track.image && (
-                                <Image
-                                  src={track.image}
-                                  alt=""
-                                  fill
-                                  sizes="40px"
-                                  style={{ objectFit: 'cover' }}
-                                  className="block"
-                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                />
-                              )}
-                              
-                              {/* Overlay indicator for active playing track */}
-                              {isActive && (
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                  <div className={`w-3 h-3 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-pulse' : 'bg-[#38bdf8]'}`} />
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="min-w-0 flex-1 flex flex-col justify-center">
-                              {/* Clean typography */}
-                              <p className={`text-[14px] font-medium truncate m-0 leading-tight ${isActive ? 'text-[#38bdf8]' : 'text-white'}`}>
-                                {track.title}
-                              </p>
-                              <p className="text-[12px] truncate m-0 mt-1 text-[#a7a7a7] leading-tight">
-                                {track.artist}
-                              </p>
-                            </div>
-                          </button>
-                        )
-                      })}
+                    {/* Scrollable body */}
+                    <div className="flex flex-col gap-2.5 h-full overflow-y-auto overflow-x-hidden overscroll-contain pr-1 [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/30 [&::-webkit-scrollbar-thumb]:rounded-full transition-all">
+                      {/* Now Playing */}
+                      <p className="text-[13px] font-bold text-white m-0 mb-2 px-2">Now playing</p>
+                      <QueueRow
+                        track={currentTrack}
+                        isActive
+                        isPlaying={isPlaying}
+                        onClick={() => setIsListOpen(false)}
+                      />
+
+                      {/* Next Up */}
+                      {playlist.length > 1 && (
+                        <>
+                          <p className="text-[13px] font-bold text-white m-0 mt-4 mb-2 px-2">Next up</p>
+                          {playlist.map((track, index) => {
+                            if (currentTrack.title === track.title) return null;
+                            return (
+                              <QueueRow
+                                key={index}
+                                track={track}
+                                isActive={false}
+                                isPlaying={false}
+                                onClick={() => { setTrackIndex(index); setIsPlaying(true); setIsListOpen(false); }}
+                              />
+                            );
+                          })}
+                        </>
+                      )}
                     </div>
                   </motion.div>
                 )}
