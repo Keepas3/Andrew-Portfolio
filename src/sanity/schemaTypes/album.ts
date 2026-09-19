@@ -104,7 +104,7 @@ export default defineType({
               title: 'Media Upload (Audio / MP4)',
               description: 'Upload the actual playable track or video file here.',
               options: {
-                accept: 'audio/*,video/mp4,video/webm' 
+                accept: 'audio/*,audio/wav,.wav,video/mp4,video/webm'
               }
             })
           ]
