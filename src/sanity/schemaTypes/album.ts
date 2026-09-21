@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { ResilientFileInput } from '../components/ResilientFileInput';
 
 export default defineType({
   name: 'album',
@@ -105,6 +106,9 @@ export default defineType({
               description: 'Upload the actual playable track or video file here.',
               options: {
                 accept: 'audio/*,audio/wav,.wav,video/mp4,video/webm'
+              },
+              components: {
+                input: ResilientFileInput
               }
             })
           ]
